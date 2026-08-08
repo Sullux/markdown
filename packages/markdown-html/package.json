@@ -1,0 +1,11 @@
+{
+  "name": "@sullux/markdown-html",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {
+    "@sullux/markdown-compiler": "file:../markdown-compiler"
+  }
+}
