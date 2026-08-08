@@ -1,0 +1,41 @@
+{
+  "name": "@sullux/markdown-html",
+  "version": "1.0.0",
+  "description": "A high-performance, bidirectional Markdown <-> HTML compiler supporting GFM, GitBook hints, syntax highlighting, and custom image dimensions.",
+  "main": "./index.js",
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "build": "node build.js",
+    "deploy": "./deploy.sh"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/markdown.git",
+    "directory": "packages/markdown-html"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/markdown/issues"
+  },
+  "homepage": "https://github.com/Sullux/markdown/tree/main/packages/markdown-html#readme",
+  "keywords": [
+    "markdown",
+    "html",
+    "compiler",
+    "converter",
+    "gfm",
+    "syntax-highlighting",
+    "bidirectional"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@sullux/markdown-compiler": "^1.0.0"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "@sullux/markdown-compiler",
+  "version": "1.0.0",
+  "description": "A lightweight, zero-dependency, purely functional Markdown AST parser, stringifier, and construction DSL.",
+  "main": "./index.js",
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "build": "node build.js",
+    "deploy": "./deploy.sh"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/markdown.git",
+    "directory": "packages/markdown-compiler"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/markdown/issues"
+  },
+  "homepage": "https://github.com/Sullux/markdown/tree/main/packages/markdown-compiler#readme",
+  "keywords": [
+    "markdown",
+    "compiler",
+    "parser",
+    "ast",
+    "stringify",
+    "gfm",
+    "frontmatter",
+    "callouts",
+    "tables"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {}
+}
