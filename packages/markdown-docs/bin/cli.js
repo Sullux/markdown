@@ -10,8 +10,9 @@ Usage: markdown-docs [options]
 Options:
   -i, --input <dir>      Path to input Markdown docs directory (default: CWD)
   -o, --output <dir>     Path to output directory (default: <input>/_site)
-  -t, --title <title>    Site title
-  --baseUrl <url>        Base URL prefix for links
+  -b, --base-url <url>   Base URL prefix for build/deployment
+  -t, --title <title>    Site title (overrides title in docs.yaml)
+  -c, --config <file>    Path to config file (default: <input>/docs.yaml)
   -h, --help             Show help documentation
 `)
 }

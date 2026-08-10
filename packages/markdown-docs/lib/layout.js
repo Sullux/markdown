@@ -1,21 +1,15 @@
 const path = require('node:path')
 const { getCss } = require('./theme')
 const { getSearchScript } = require('./search')
+const { SVGS } = require('./icons')
 
-const calcRelativeHref = (currentHref, targetHref) => {
-  if (!targetHref) return '#'
-  const currentDir = path.dirname(currentHref)
-  const rel = path.relative(currentDir, targetHref.replace(/\.md$/, '.html'))
-  return rel || './'
-}
+const calcRelativeHref = (currentHref, targetHref) => targetHref ? (path.relative(path.dirname(currentHref), targetHref.replace(/\.md$/, '.html')) || './') : '#'
 
 const renderNavTree = (items, currentHref) => {
-  if (!items || items.length === 0) return ''
-  let html = ''
-  let group = []
-
+  if (!items?.length) return ''
+  let html = '', group = []
   const flushGroup = () => {
-    if (group.length === 0) return ''
+    if (!group.length) return ''
     const list = `<ul class="nav-list">\n` + group.map((item) => {
       const active = item.href === currentHref ? ' active' : ''
       const href = calcRelativeHref(currentHref, item.href)
@@ -25,7 +19,6 @@ const renderNavTree = (items, currentHref) => {
     group = []
     return list
   }
-
   for (const item of items) {
     if (item.type === 'section') {
       html += `${flushGroup()}<div class="nav-section-title">${item.title}</div>\n`
@@ -35,62 +28,68 @@ const renderNavTree = (items, currentHref) => {
   return html + flushGroup()
 }
 
-const renderTocList = (toc) => {
-  if (!toc || toc.length === 0) return ''
-  return `<div class="toc-title">On this page</div>\n<ul class="toc-list">\n` + toc.map((item) => `
-    <li class="toc-item level-${item.level}">
-      <a href="#${item.id}" class="toc-link">${item.title}</a>
-    </li>
-  `).join('') + `</ul>\n`
+const renderTocList = (toc) => toc?.length ? `<div class="toc-title">On this page</div>\n<ul class="toc-list">\n` + toc.map((i) => `<li class="toc-item level-${i.level}"><a href="#${i.id}" class="toc-link" onclick="closeAllDrawers()">${i.title}</a></li>`).join('') + `</ul>\n` : ''
+
+const resolveAssetHref = (currentHref, assetPath) => (!assetPath || assetPath.startsWith('http') || assetPath.startsWith('<svg') || assetPath.startsWith('data:')) ? assetPath : calcRelativeHref(currentHref, assetPath.replace(/^\.\//, ''))
+
+const renderSingleLogo = (logo, modeClass, title, currentHref) => logo ? (typeof logo === 'string' && logo.startsWith('<svg') ? logo : `<img src="${resolveAssetHref(currentHref, logo)}" alt="${title || 'Logo'}" class="${modeClass ? `brand-logo ${modeClass}` : 'brand-logo'}" />`) : ''
+
+const renderBrandLogo = (logo, title, currentHref) => {
+  const titleSpan = title ? `<span>${title}</span>` : ''
+  if (!logo) return title ? `📚 ${title}` : '📚'
+  if (typeof logo === 'string') return `${renderSingleLogo(logo, '', title, currentHref)}${titleSpan}`
+  if (typeof logo === 'object') return `${renderSingleLogo(logo.light, 'logo-light', title, currentHref)}${renderSingleLogo(logo.dark, 'logo-dark', title, currentHref)}${titleSpan}`
+  return title ? `📚 ${title}` : '📚'
 }
 
-const renderPageLayout = ({ title, navTree, toc, contentHtml, currentHref }) => {
-  const sidebarNav = renderNavTree(navTree, currentHref)
-  const tocHtml = renderTocList(toc)
-  const appTitle = title.split(' - ')[1] || title
+const renderFavicon = (f) => f ? `<link rel="icon" href="${f}" />` : `<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">`
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
+const renderHeaderLinks = (links = []) => links?.length ? `<div class="header-links">` + links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener" class="header-link">${l.title} ↗</a>`).join('') + `</div>` : ''
+
+const renderPageLayout = ({ title, siteTitle, navTree, toc, contentHtml, currentHref, logo, favicon, links, theme }) => {
+  const sidebarNav = renderNavTree(navTree, currentHref)
+  return `<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title}</title><style>${getCss()}</style>
+  <title>${title}</title>${renderFavicon(favicon)}<style>${getCss(theme)}</style>
   <script>
-    function toggleTheme() {
-      var html = document.documentElement, next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      if (next === 'dark') html.setAttribute('data-theme', 'dark'); else html.removeAttribute('data-theme');
-      try { localStorage.setItem('sullux-theme', next); } catch(e) {}
+    function setThemeMode(m) {
+      try { localStorage.setItem('sullux-theme-mode', m); } catch(e) {}
+      if (m === 'light' || m === 'dark') document.documentElement.setAttribute('data-theme', m); else document.documentElement.removeAttribute('data-theme');
+      document.querySelectorAll('.theme-opt').forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-mode') === m); });
     }
+    function toggleDrawer(id) {
+      var d = document.getElementById(id), b = document.getElementById('drawer-backdrop'), open = d?.classList.contains('open');
+      closeAllDrawers(); if (!open && d && b) { d.classList.add('open'); b.classList.add('open'); }
+    }
+    function closeAllDrawers() { document.querySelectorAll('.app-sidebar, .app-toc, .drawer-backdrop').forEach(function(e) { e.classList.remove('open'); }); }
     (function() {
-      try {
-        var saved = localStorage.getItem('sullux-theme');
-        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
-      } catch(e) {}
+      var m = 'system'; try { m = localStorage.getItem('sullux-theme-mode') || 'system'; } catch(e) {}
+      if (m === 'light' || m === 'dark') document.documentElement.setAttribute('data-theme', m);
     })();
+    window.addEventListener('DOMContentLoaded', function() { setThemeMode(localStorage.getItem('sullux-theme-mode') || 'system'); });
   </script>
-</head>
-<body>
+</head><body>
   <header class="top-header">
-    <a href="${calcRelativeHref(currentHref, 'index.html')}" class="header-brand">📚 ${appTitle}</a>
-    <div class="search-box">
-      <input type="text" id="doc-search" class="search-input" placeholder="Search docs..." />
-      <div id="search-results" class="search-results"></div>
-    </div>
+    <div class="header-left"><button class="header-btn hamburger-btn" onclick="toggleDrawer('sidebar-drawer')" aria-label="Toggle navigation">${SVGS.hamburger}</button><a href="${calcRelativeHref(currentHref, 'index.html')}" class="header-brand">${renderBrandLogo(logo, siteTitle, currentHref)}</a></div>
+    <div class="header-center"><div class="search-box"><input type="text" id="doc-search" class="search-input" placeholder="Search docs..." /><div id="search-results" class="search-results"></div></div></div>
+    <div class="header-right">${renderHeaderLinks(links)}<button class="header-btn page-index-btn" onclick="toggleDrawer('toc-drawer')" aria-label="Toggle page outline">${SVGS.pageIndex}</button></div>
   </header>
   <div class="app-container">
-    <aside class="app-sidebar"><nav class="app-nav">${sidebarNav}</nav></aside>
+    <aside id="sidebar-drawer" class="app-sidebar"><div class="drawer-header"><span class="drawer-title">Navigation</span><button class="drawer-close" onclick="closeAllDrawers()">${SVGS.close}</button></div><nav class="app-nav">${sidebarNav}</nav></aside>
     <main class="app-main"><article class="app-article">${contentHtml}</article></main>
-    <aside class="app-toc">
-      ${tocHtml}
+    <aside id="toc-drawer" class="app-toc">
+      <div class="drawer-header"><span class="drawer-title">Page Outline</span><button class="drawer-close" onclick="closeAllDrawers()">${SVGS.close}</button></div>
+      ${renderTocList(toc)}
       <div class="theme-picker">
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">Theme</button>
+        <button class="theme-opt" data-mode="light" onclick="setThemeMode('light')" title="Light">${SVGS.sun}</button>
+        <button class="theme-opt" data-mode="system" onclick="setThemeMode('system')" title="System">${SVGS.system}</button>
+        <button class="theme-opt" data-mode="dark" onclick="setThemeMode('dark')" title="Dark">${SVGS.moon}</button>
       </div>
     </aside>
   </div>
+  <div id="drawer-backdrop" class="drawer-backdrop" onclick="closeAllDrawers()"></div>
   ${getSearchScript()}
-</body>
-</html>`
+</body></html>`
 }
 
 module.exports = { renderPageLayout, calcRelativeHref }
