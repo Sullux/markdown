@@ -1,8 +1,10 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const { parse } = require('@sullux/markdown-compiler')
 const { markdownToHtml } = require('@sullux/markdown-html')
 const { normalizeConfig } = require('./config')
 const { getNavigationTree } = require('./summary')
+const { extractToc } = require('./toc')
 const { renderPageLayout } = require('./layout')
 const { copyAssets } = require('./assets')
 
@@ -25,6 +27,22 @@ const collectMarkdownFiles = (dir, rootDir = dir) => {
   return files
 }
 
+const ensureIndexHtml = (outputDir, generatedPages) => {
+  const indexPath = path.join(outputDir, 'index.html')
+  if (fs.existsSync(indexPath)) return
+
+  const readmePath = path.join(outputDir, 'README.html')
+  if (fs.existsSync(readmePath)) {
+    fs.copyFileSync(readmePath, indexPath)
+    return
+  }
+
+  if (generatedPages.length > 0) {
+    const firstHtmlPath = path.join(outputDir, generatedPages[0].replace(/\.md$/, '.html'))
+    if (fs.existsSync(firstHtmlPath)) fs.copyFileSync(firstHtmlPath, indexPath)
+  }
+}
+
 const generateSite = (options = {}) => {
   const config = normalizeConfig(options)
   if (!fs.existsSync(config.input)) {
@@ -38,7 +56,10 @@ const generateSite = (options = {}) => {
 
   for (const file of mdFiles) {
     const rawMd = fs.readFileSync(file.fullPath, 'utf8')
-    const contentHtml = markdownToHtml(rawMd)
+    const ast = parse(rawMd)
+    const toc = extractToc(ast)
+    const rawHtml = markdownToHtml(rawMd)
+    const contentHtml = rawHtml.replace(/href="([^":#]+)\.md(#.*?)?"/g, 'href="$1.html$2"')
 
     const relHtmlPath = file.relPath.replace(/\.md$/, '.html')
     const outHtmlPath = path.join(config.output, relHtmlPath)
@@ -49,9 +70,9 @@ const generateSite = (options = {}) => {
     const fullHtml = renderPageLayout({
       title: pageTitle,
       navTree,
+      toc,
       contentHtml,
       currentHref: file.relPath,
-      baseUrl: config.baseUrl,
     })
 
     fs.writeFileSync(outHtmlPath, fullHtml, 'utf8')
@@ -64,6 +85,7 @@ const generateSite = (options = {}) => {
     })
   }
 
+  ensureIndexHtml(config.output, mdFiles.map((f) => f.relPath))
   fs.writeFileSync(path.join(config.output, 'search-index.json'), JSON.stringify(searchIndex, null, 2))
   copyAssets(config.input, config.output)
 
