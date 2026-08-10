@@ -1,0 +1,44 @@
+{
+  "name": "@sullux/markdown-docs",
+  "version": "1.0.0",
+  "description": "A zero-dependency, local-first static documentation site generator compiling GitBook-style Markdown docs.",
+  "main": "./index.js",
+  "bin": {
+    "markdown-docs": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "build": "node build.js",
+    "deploy": "./deploy.sh"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/markdown.git",
+    "directory": "packages/markdown-docs"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/markdown/issues"
+  },
+  "homepage": "https://github.com/Sullux/markdown/tree/main/packages/markdown-docs#readme",
+  "keywords": [
+    "markdown",
+    "docs",
+    "gitbook",
+    "static-site-generator",
+    "documentation",
+    "compiler"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@sullux/markdown-compiler": "^1.0.0",
+    "@sullux/markdown-html": "^1.0.0"
+  }
+}
