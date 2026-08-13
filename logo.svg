@@ -1,0 +1,46 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 275 275"
+  width="275"
+  height="275"
+>
+  <path
+    fill="none"
+    stroke="#6040ff"
+    stroke-width="15"
+    stroke-linecap="round"
+    stroke-linejoin="miter"
+    d="
+      M 87.5 15
+      l -25 250
+      M 212.5 15
+      l -25 250
+    "
+  />
+  <path
+    fill="none"
+    stroke="#b0b060"
+    stroke-width="15"
+    stroke-linecap="round"
+    stroke-linejoin="miter"
+    d="
+      M 15 87.5
+      l 250 0
+      M 15 212.5
+      l 250 0
+    "
+  />
+  <path
+    fill="none"
+    stroke="#6040ff"
+    stroke-width="15"
+    stroke-linecap="round"
+    stroke-linejoin="miter"
+    d="
+      M 87.5 15
+      l 40 250
+      m 0 0
+      l 85 -250
+    "
+  />
+</svg>
