@@ -1,6 +1,6 @@
 {
   "name": "@sullux/markdown-docs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A zero-dependency, local-first static documentation site generator compiling GitBook-style Markdown docs.",
   "main": "./index.js",
   "bin": {

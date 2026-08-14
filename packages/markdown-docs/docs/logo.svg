@@ -1,0 +1,39 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 275 275"
+  width="275"
+  height="275"
+>
+  <path
+    fill="none"
+    stroke="#6040ff"
+    stroke-width="15"
+    stroke-linecap="round"
+    stroke-linejoin="miter"
+    d="
+      M 10 25
+      l 250 0
+    "
+  />
+  <rect
+    fill="#6040ff"
+    x="75"
+    y="50"
+    width="125"
+    height="200"
+    rx="10"
+  />
+  <path
+    fill="#b0b060"
+    stroke="#b0b060"
+    stroke-width="15"
+    stroke-linecap="round"
+    stroke-linejoin="miter"
+    d="
+      M 10 125
+      l 250 0
+      M 10 175
+      l 250 0
+    "
+  />
+</svg>
