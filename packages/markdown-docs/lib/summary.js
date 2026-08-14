@@ -2,6 +2,14 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { parse } = require('@sullux/markdown-compiler')
 
+const normalizeHref = (url) => {
+  if (!url) return '#'
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/') || url.startsWith('#')) return url
+  return url
+    .replace(/(?:^|\/)README\.md(#.*)?$/i, (match) => match.replace(/README\.md/i, 'index.html'))
+    .replace(/\.md(#.*)?$/, (match) => match.replace(/\.md/, '.html'))
+}
+
 const parseSummaryMd = (content) => {
   const ast = parse(content)
   const nav = []
@@ -18,7 +26,7 @@ const parseSummaryMd = (content) => {
         for (const node of itemNodes) {
           if (node.type === 'link') {
             const title = node.children ? node.children.map((c) => c.value || '').join('') : ''
-            listItems.push({ title, href: node.url, children: [] })
+            listItems.push({ title, href: normalizeHref(node.url), children: [] })
           }
         }
       }
@@ -49,8 +57,9 @@ const scanDir = (dir, rootDir = dir) => {
         items.push({ type: 'section', title, items: children })
       }
     } else if (entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'SUMMARY.md') {
-      const title = entry.name.replace(/\.md$/, '').replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
-      items.push({ title, href: relPath, children: [] })
+      const isReadme = /^README\.md$/i.test(entry.name)
+      const title = isReadme ? 'Overview' : entry.name.replace(/\.md$/, '').replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      items.push({ title, href: normalizeHref(relPath), children: [] })
     }
   }
 
@@ -65,4 +74,4 @@ const getNavigationTree = (inputDir) => {
   return scanDir(inputDir)
 }
 
-module.exports = { parseSummaryMd, scanDir, getNavigationTree }
+module.exports = { normalizeHref, parseSummaryMd, scanDir, getNavigationTree }

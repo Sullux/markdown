@@ -3,7 +3,26 @@ const { getCss } = require('./theme')
 const { getSearchScript } = require('./search')
 const { SVGS } = require('./icons')
 
-const calcRelativeHref = (currentHref, targetHref) => targetHref ? (path.relative(path.dirname(currentHref), targetHref.replace(/\.md$/, '.html')) || './') : '#'
+const normalizeTargetHref = (href) => {
+  if (!href) return '#'
+  if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('/') || href.startsWith('#') || href.startsWith('mailto:')) {
+    return href
+  }
+  return href
+    .replace(/(?:^|\/)README\.(?:md|html)(#.*)?$/i, (match) => match.replace(/README\.(?:md|html)/i, 'index.html'))
+    .replace(/\.md(#.*)?$/, (match) => match.replace(/\.md/, '.html'))
+}
+
+const calcRelativeHref = (currentHref, targetHref) => {
+  if (!targetHref) return '#'
+  const normalizedTarget = normalizeTargetHref(targetHref)
+  if (normalizedTarget.startsWith('http://') || normalizedTarget.startsWith('https://') || normalizedTarget.startsWith('/') || normalizedTarget.startsWith('#') || normalizedTarget.startsWith('mailto:')) {
+    return normalizedTarget
+  }
+  const normalizedCurrent = normalizeTargetHref(currentHref)
+  const rel = path.relative(path.dirname(normalizedCurrent), normalizedTarget)
+  return rel || './'
+}
 
 const renderNavTree = (items, currentHref) => {
   if (!items?.length) return ''
@@ -11,7 +30,7 @@ const renderNavTree = (items, currentHref) => {
   const flushGroup = () => {
     if (!group.length) return ''
     const list = `<ul class="nav-list">\n` + group.map((item) => {
-      const active = item.href === currentHref ? ' active' : ''
+      const active = normalizeTargetHref(item.href) === normalizeTargetHref(currentHref) ? ' active' : ''
       const href = calcRelativeHref(currentHref, item.href)
       const sub = item.children?.length ? renderNavTree(item.children, currentHref) : ''
       return `<li class="nav-item"><a href="${href}" class="nav-link${active}">${item.title}</a>${sub ? `<div class="nav-sub">${sub}</div>` : ''}</li>\n`
@@ -30,7 +49,12 @@ const renderNavTree = (items, currentHref) => {
 
 const renderTocList = (toc) => toc?.length ? `<div class="toc-title">On this page</div>\n<ul class="toc-list">\n` + toc.map((i) => `<li class="toc-item level-${i.level}"><a href="#${i.id}" class="toc-link" onclick="closeAllDrawers()">${i.title}</a></li>`).join('') + `</ul>\n` : ''
 
-const resolveAssetHref = (currentHref, assetPath) => (!assetPath || assetPath.startsWith('http') || assetPath.startsWith('<svg') || assetPath.startsWith('data:') || assetPath.startsWith('/')) ? assetPath : calcRelativeHref(currentHref, assetPath.replace(/^\.\//, ''))
+const resolveAssetHref = (currentHref, assetPath) => {
+  if (!assetPath || assetPath.startsWith('http') || assetPath.startsWith('<svg') || assetPath.startsWith('data:') || assetPath.startsWith('/')) {
+    return assetPath
+  }
+  return calcRelativeHref(currentHref, assetPath.replace(/^\.\//, ''))
+}
 
 const renderSingleLogo = (logo, modeClass, title, currentHref) => logo ? (typeof logo === 'string' && logo.startsWith('<svg') ? logo : `<img src="${resolveAssetHref(currentHref, logo)}" alt="${title || 'Logo'}" class="${modeClass ? `brand-logo ${modeClass}` : 'brand-logo'}" />`) : ''
 
@@ -77,19 +101,11 @@ const renderPageLayout = ({ title, siteTitle, navTree, toc, contentHtml, current
   <div class="app-container">
     <aside id="sidebar-drawer" class="app-sidebar"><div class="drawer-header"><span class="drawer-title">Navigation</span><button class="drawer-close" onclick="closeAllDrawers()">${SVGS.close}</button></div><nav class="app-nav">${sidebarNav}</nav></aside>
     <main class="app-main"><article class="app-article">${contentHtml}</article></main>
-    <aside id="toc-drawer" class="app-toc">
-      <div class="drawer-header"><span class="drawer-title">Page Outline</span><button class="drawer-close" onclick="closeAllDrawers()">${SVGS.close}</button></div>
-      ${renderTocList(toc)}
-      <div class="theme-picker">
-        <button class="theme-opt" data-mode="light" onclick="setThemeMode('light')" title="Light">${SVGS.sun}</button>
-        <button class="theme-opt" data-mode="system" onclick="setThemeMode('system')" title="System">${SVGS.system}</button>
-        <button class="theme-opt" data-mode="dark" onclick="setThemeMode('dark')" title="Dark">${SVGS.moon}</button>
-      </div>
-    </aside>
+    <aside id="toc-drawer" class="app-toc"><div class="toc-container">${renderTocList(toc)}</div></aside>
   </div>
   <div id="drawer-backdrop" class="drawer-backdrop" onclick="closeAllDrawers()"></div>
-  ${getSearchScript()}
+  <script>${getSearchScript()}</script>
 </body></html>`
 }
 
-module.exports = { renderPageLayout, calcRelativeHref }
+module.exports = { calcRelativeHref, renderPageLayout }

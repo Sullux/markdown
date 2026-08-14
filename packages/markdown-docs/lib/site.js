@@ -21,14 +21,25 @@ const collectMarkdownFiles = (dir, rootDir = dir) => {
   return files
 }
 
-const ensureIndexHtml = (outputDir, generatedPages) => {
-  if (generatedPages.some((p) => p === 'index.md')) return
-  const readmePath = path.join(outputDir, 'README.html'), indexPath = path.join(outputDir, 'index.html')
-  if (fs.existsSync(readmePath)) fs.copyFileSync(readmePath, indexPath)
-  else if (generatedPages.length > 0) {
-    const firstHtmlPath = path.join(outputDir, generatedPages[0].replace(/\.md$/, '.html'))
-    if (fs.existsSync(firstHtmlPath)) fs.copyFileSync(firstHtmlPath, indexPath)
+const extractFirstH1 = (ast) => {
+  for (const block of ast.blocks || []) {
+    if (block.type === 'header' && block.level === 1) {
+      return block.children ? block.children.map((c) => c.value || '').join('') : ''
+    }
   }
+  return ''
+}
+
+const normalizeHtmlPath = (relPath) => {
+  return relPath
+    .replace(/(?:^|\/)README\.md$/i, (match) => match.replace(/README\.md$/i, 'index.html'))
+    .replace(/\.md$/, '.html')
+}
+
+const rewriteMarkdownLinks = (html) => {
+  return html
+    .replace(/href="([^":#]*?)README\.md(#.*?)?"/gi, 'href="$1index.html$2"')
+    .replace(/href="([^":#]+)\.md(#.*?)?"/g, 'href="$1.html$2"')
 }
 
 const generateSite = (options = {}) => {
@@ -40,26 +51,38 @@ const generateSite = (options = {}) => {
 
   for (const file of mdFiles) {
     const rawMd = fs.readFileSync(file.fullPath, 'utf8')
-    const ast = parse(rawMd), toc = extractToc(ast), rawHtml = markdownToHtml(rawMd)
-    const contentHtml = rawHtml.replace(/href="([^":#]+)\.md(#.*?)?"/g, 'href="$1.html$2"')
-    const relHtmlPath = file.relPath.replace(/\.md$/, '.html'), outHtmlPath = path.join(config.output, relHtmlPath)
+    const ast = parse(rawMd)
+    const toc = extractToc(ast)
+    const rawHtml = markdownToHtml(rawMd)
+    const contentHtml = rewriteMarkdownLinks(rawHtml)
+    const relHtmlPath = normalizeHtmlPath(file.relPath)
+    const outHtmlPath = path.join(config.output, relHtmlPath)
 
     fs.mkdirSync(path.dirname(outHtmlPath), { recursive: true })
 
-    const pageTitle = config.title ? `${file.relPath.replace(/\.md$/, '')} - ${config.title}` : file.relPath.replace(/\.md$/, '')
+    const h1Title = extractFirstH1(ast)
+    const fallbackTitle = file.relPath.replace(/(?:^|\/)README\.md$/i, '').replace(/\.md$/, '') || config.title || 'Home'
+    const docTitle = h1Title || fallbackTitle
+    const pageTitle = config.title && docTitle !== config.title ? `${docTitle} - ${config.title}` : (docTitle || config.title)
 
     const fullHtml = renderPageLayout({
-      title: pageTitle, siteTitle: config.title,
-      navTree, toc, contentHtml, currentHref: file.relPath,
-      logo: config.logo, favicon: config.favicon, links: config.links, theme: config.theme,
+      title: pageTitle,
+      siteTitle: config.title,
+      navTree,
+      toc,
+      contentHtml,
+      currentHref: relHtmlPath,
+      logo: config.logo,
+      favicon: config.favicon,
+      links: config.links,
+      theme: config.theme,
     })
 
     fs.writeFileSync(outHtmlPath, fullHtml, 'utf8')
     const plainText = rawMd.replace(/[#*`_\[\]()\-]/g, ' ').replace(/\s+/g, ' ').trim()
-    searchIndex.push({ title: file.relPath.replace(/\.md$/, ''), href: relHtmlPath, content: plainText.slice(0, 300) })
+    searchIndex.push({ title: docTitle, href: relHtmlPath, content: plainText.slice(0, 300) })
   }
 
-  ensureIndexHtml(config.output, mdFiles.map((f) => f.relPath))
   fs.writeFileSync(path.join(config.output, 'search-index.json'), JSON.stringify(searchIndex, null, 2))
   copyAssets(config.input, config.output)
 
