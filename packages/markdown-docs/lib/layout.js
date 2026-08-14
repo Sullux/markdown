@@ -101,7 +101,15 @@ const renderPageLayout = ({ title, siteTitle, navTree, toc, contentHtml, current
   <div class="app-container">
     <aside id="sidebar-drawer" class="app-sidebar"><div class="drawer-header"><span class="drawer-title">Navigation</span><button class="drawer-close" onclick="closeAllDrawers()">${SVGS.close}</button></div><nav class="app-nav">${sidebarNav}</nav></aside>
     <main class="app-main"><article class="app-article">${contentHtml}</article></main>
-    <aside id="toc-drawer" class="app-toc"><div class="toc-container">${renderTocList(toc)}</div></aside>
+    <aside id="toc-drawer" class="app-toc">
+      <div class="drawer-header"><span class="drawer-title">Page Outline</span><button class="drawer-close" onclick="closeAllDrawers()">${SVGS.close}</button></div>
+      <div class="toc-container">${renderTocList(toc)}</div>
+      <div class="theme-picker">
+        <button class="theme-opt" data-mode="light" onclick="setThemeMode('light')" title="Light">${SVGS.sun}</button>
+        <button class="theme-opt" data-mode="system" onclick="setThemeMode('system')" title="System">${SVGS.system}</button>
+        <button class="theme-opt" data-mode="dark" onclick="setThemeMode('dark')" title="Dark">${SVGS.moon}</button>
+      </div>
+    </aside>
   </div>
   <div id="drawer-backdrop" class="drawer-backdrop" onclick="closeAllDrawers()"></div>
   <script>${getSearchScript()}</script>
