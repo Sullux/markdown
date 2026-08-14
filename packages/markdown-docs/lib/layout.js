@@ -30,7 +30,7 @@ const renderNavTree = (items, currentHref) => {
 
 const renderTocList = (toc) => toc?.length ? `<div class="toc-title">On this page</div>\n<ul class="toc-list">\n` + toc.map((i) => `<li class="toc-item level-${i.level}"><a href="#${i.id}" class="toc-link" onclick="closeAllDrawers()">${i.title}</a></li>`).join('') + `</ul>\n` : ''
 
-const resolveAssetHref = (currentHref, assetPath) => (!assetPath || assetPath.startsWith('http') || assetPath.startsWith('<svg') || assetPath.startsWith('data:')) ? assetPath : calcRelativeHref(currentHref, assetPath.replace(/^\.\//, ''))
+const resolveAssetHref = (currentHref, assetPath) => (!assetPath || assetPath.startsWith('http') || assetPath.startsWith('<svg') || assetPath.startsWith('data:') || assetPath.startsWith('/')) ? assetPath : calcRelativeHref(currentHref, assetPath.replace(/^\.\//, ''))
 
 const renderSingleLogo = (logo, modeClass, title, currentHref) => logo ? (typeof logo === 'string' && logo.startsWith('<svg') ? logo : `<img src="${resolveAssetHref(currentHref, logo)}" alt="${title || 'Logo'}" class="${modeClass ? `brand-logo ${modeClass}` : 'brand-logo'}" />`) : ''
 
