@@ -29,9 +29,9 @@ const stringifyNode = (node) => {
       return `\n> [!${tag}]\n${inner.split('\n').map((line) => `> ${line}`).join('\n')}\n`
     }
     case 'bulletList':
-      return `\n${node.items.map((item) => `* ${stringifyNode(item).trim()}`).join('\n')}\n`
+      return `\n${node.items.map((item) => `${' '.repeat(item.indent || 0)}* ${stringifyNode(item).trim()}`).join('\n')}\n`
     case 'orderedList':
-      return `\n${node.items.map((item, idx) => `${idx + 1}. ${stringifyNode(item).trim()}`).join('\n')}\n`
+      return `\n${node.items.map((item, idx) => `${' '.repeat(item.indent || 0)}${idx + 1}. ${stringifyNode(item).trim()}`).join('\n')}\n`
     case 'table':
       return stringifyTable(node, stringifyNode)
     default:

@@ -59,8 +59,9 @@ const parseBlockHeadersAndLists = (line, currentBlock, blocks) => {
       if (currentBlock) blocks.push(currentBlock)
       currentBlock = null
     }
-    if (!currentBlock) currentBlock = { type: 'bulletList', items: [bulletMatch[3]] }
-    else currentBlock.items.push(bulletMatch[3])
+    const item = { indent: bulletMatch[1].length, text: bulletMatch[3] }
+    if (!currentBlock) currentBlock = { type: 'bulletList', items: [item] }
+    else currentBlock.items.push(item)
     return { block: currentBlock, handled: true, isAccumulating: true }
   }
 
@@ -70,8 +71,9 @@ const parseBlockHeadersAndLists = (line, currentBlock, blocks) => {
       if (currentBlock) blocks.push(currentBlock)
       currentBlock = null
     }
-    if (!currentBlock) currentBlock = { type: 'orderedList', items: [orderedMatch[3]] }
-    else currentBlock.items.push(orderedMatch[3])
+    const item = { indent: orderedMatch[1].length, text: orderedMatch[3] }
+    if (!currentBlock) currentBlock = { type: 'orderedList', items: [item] }
+    else currentBlock.items.push(item)
     return { block: currentBlock, handled: true, isAccumulating: true }
   }
 

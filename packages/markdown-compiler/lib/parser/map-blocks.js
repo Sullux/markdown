@@ -20,8 +20,18 @@ const mapBlocks = (blocks, parseBlocks) => {
       const fullContent = block.lines.join('\n')
       return { type: 'callout', style: block.style, children: parseBlocks(fullContent) }
     }
-    if (block.type === 'bulletList') return { type: 'bulletList', items: block.items.map((item) => parseInline(item)) }
-    if (block.type === 'orderedList') return { type: 'orderedList', items: block.items.map((item) => parseInline(item)) }
+    if (block.type === 'bulletList' || block.type === 'orderedList') {
+      const items = block.items.map((item) => {
+        const raw = typeof item === 'string' ? item : (item.text || '')
+        const children = parseInline(raw)
+        if (typeof item === 'object' && item.indent != null) {
+          children.indent = item.indent
+          children.depth = Math.floor(item.indent / 2)
+        }
+        return children
+      })
+      return { type: block.type, items }
+    }
     if (block.type === 'table') return parseTableBlock(block.headerLine, block.dividerLine, block.rows)
     return block
   })

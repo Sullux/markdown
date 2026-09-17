@@ -151,6 +151,27 @@ test('code blocks extract language and languageMetadata', () => {
   assert.strictEqual(codeBlock.languageMetadata, 'github title="example.md"')
 })
 
+test('nested bullet lists preserve indentation and depth', () => {
+  const md = [
+    '* Item 1',
+    '  * Sub-item 1.1',
+    '    * Sub-item 1.1.1',
+    '* Item 2',
+  ].join('\n')
+
+  const ast = parse(md)
+  assert.strictEqual(ast.blocks[0].type, 'bulletList')
+  assert.strictEqual(ast.blocks[0].items.length, 4)
+  assert.strictEqual(ast.blocks[0].items[0].indent, 0)
+  assert.strictEqual(ast.blocks[0].items[0].depth, 0)
+  assert.strictEqual(ast.blocks[0].items[1].indent, 2)
+  assert.strictEqual(ast.blocks[0].items[1].depth, 1)
+  assert.strictEqual(ast.blocks[0].items[2].indent, 4)
+  assert.strictEqual(ast.blocks[0].items[2].depth, 2)
+  assert.strictEqual(ast.blocks[0].items[3].indent, 0)
+  assert.strictEqual(ast.blocks[0].items[3].depth, 0)
+})
+
 test('image dimension parsing supports Obsidian, Pandoc/Gitlab, GitHub, and VS Code syntaxes', () => {
   const obs1 = parse('![Diagram|400x200](schema.png)')
   assert.strictEqual(obs1.blocks[0].children[0].width, '400px')
