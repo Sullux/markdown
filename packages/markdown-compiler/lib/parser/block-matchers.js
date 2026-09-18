@@ -54,27 +54,30 @@ const parseBlockHeadersAndLists = (line, currentBlock, blocks) => {
   }
 
   const bulletMatch = line.match(/^(\s*)([\*\-+])\s+(.*)$/)
-  if (bulletMatch) {
-    if (currentBlock && currentBlock.type !== 'bulletList') {
-      if (currentBlock) blocks.push(currentBlock)
-      currentBlock = null
-    }
-    const item = { indent: bulletMatch[1].length, text: bulletMatch[3] }
-    if (!currentBlock) currentBlock = { type: 'bulletList', items: [item] }
-    else currentBlock.items.push(item)
-    return { block: currentBlock, handled: true, isAccumulating: true }
-  }
+  const orderedMatch = !bulletMatch ? line.match(/^(\s*)(\d+)\.\s+(.*)$/) : null
 
-  const orderedMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/)
-  if (orderedMatch) {
-    if (currentBlock && currentBlock.type !== 'orderedList') {
-      if (currentBlock) blocks.push(currentBlock)
-      currentBlock = null
+  if (bulletMatch || orderedMatch) {
+    const isBullet = Boolean(bulletMatch)
+    const match = bulletMatch || orderedMatch
+    const indent = match[1].length
+    const item = isBullet
+      ? { indent, text: match[3], listType: 'bullet', marker: match[2] }
+      : { indent, text: match[3], listType: 'ordered', order: parseInt(match[2], 10) }
+
+    const isListBlock = currentBlock && (currentBlock.type === 'bulletList' || currentBlock.type === 'orderedList')
+    const matchesTopLevel = currentBlock && (
+      (currentBlock.type === 'bulletList' && isBullet) ||
+      (currentBlock.type === 'orderedList' && !isBullet)
+    )
+
+    if (isListBlock && (indent > 0 || matchesTopLevel)) {
+      currentBlock.items.push(item)
+      return { block: currentBlock, handled: true, isAccumulating: true }
     }
-    const item = { indent: orderedMatch[1].length, text: orderedMatch[3] }
-    if (!currentBlock) currentBlock = { type: 'orderedList', items: [item] }
-    else currentBlock.items.push(item)
-    return { block: currentBlock, handled: true, isAccumulating: true }
+
+    if (currentBlock) blocks.push(currentBlock)
+    const newBlock = { type: isBullet ? 'bulletList' : 'orderedList', items: [item] }
+    return { block: newBlock, handled: true, isAccumulating: true }
   }
 
   return { handled: false }

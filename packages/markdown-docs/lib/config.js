@@ -52,7 +52,10 @@ const normalizeConfig = (opts = {}) => {
   const input = path.resolve(opts.input || process.cwd())
   const fileConfig = loadFileConfig(input, opts.config)
 
-  const output = path.resolve(opts.output || fileConfig.output || path.join(input, '_site'))
+  const rawOutput = opts.output || fileConfig.output
+  const output = rawOutput
+    ? (path.isAbsolute(rawOutput) ? rawOutput : (opts.output ? path.resolve(rawOutput) : path.resolve(input, rawOutput)))
+    : path.join(input, '_site')
   const title = opts.title !== undefined ? opts.title : (fileConfig.title !== undefined ? fileConfig.title : '')
   const baseUrl = opts.baseUrl !== undefined ? opts.baseUrl : (fileConfig.baseUrl !== undefined ? fileConfig.baseUrl : '')
   const logo = fileConfig.logo || opts.logo || ''

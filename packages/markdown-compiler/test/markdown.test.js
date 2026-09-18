@@ -172,6 +172,53 @@ test('nested bullet lists preserve indentation and depth', () => {
   assert.strictEqual(ast.blocks[0].items[3].depth, 0)
 })
 
+test('ordered list with nested bullet sub-list preserves single list block and continuation numbering', () => {
+  const md = [
+    '1. Streaming & Chunking',
+    '2. Pre-processing',
+    '3. Summarization via MapReduce',
+    '    * Map',
+    '    * Reduce',
+    '4. LLM Integration',
+  ].join('\n')
+
+  const ast = parse(md)
+  assert.strictEqual(ast.blocks.length, 1)
+  assert.strictEqual(ast.blocks[0].type, 'orderedList')
+  assert.strictEqual(ast.blocks[0].items.length, 6)
+
+  const items = ast.blocks[0].items
+  assert.strictEqual(items[0].order, 1)
+  assert.strictEqual(items[0].depth, 0)
+  assert.strictEqual(items[0].listType, 'ordered')
+
+  assert.strictEqual(items[1].order, 2)
+  assert.strictEqual(items[1].depth, 0)
+  assert.strictEqual(items[1].listType, 'ordered')
+
+  assert.strictEqual(items[2].order, 3)
+  assert.strictEqual(items[2].depth, 0)
+  assert.strictEqual(items[2].listType, 'ordered')
+
+  assert.strictEqual(items[3].depth, 1)
+  assert.strictEqual(items[3].listType, 'bullet')
+  assert.strictEqual(items[3].marker, '*')
+
+  assert.strictEqual(items[4].depth, 1)
+  assert.strictEqual(items[4].listType, 'bullet')
+  assert.strictEqual(items[4].marker, '*')
+
+  assert.strictEqual(items[5].order, 4)
+  assert.strictEqual(items[5].depth, 0)
+  assert.strictEqual(items[5].listType, 'ordered')
+
+  const stringified = stringify(ast)
+  assert.ok(stringified.includes('1. Streaming & Chunking'))
+  assert.ok(stringified.includes('    * Map'))
+  assert.ok(stringified.includes('    * Reduce'))
+  assert.ok(stringified.includes('4. LLM Integration'))
+})
+
 test('image dimension parsing supports Obsidian, Pandoc/Gitlab, GitHub, and VS Code syntaxes', () => {
   const obs1 = parse('![Diagram|400x200](schema.png)')
   assert.strictEqual(obs1.blocks[0].children[0].width, '400px')

@@ -29,9 +29,17 @@ const stringifyNode = (node) => {
       return `\n> [!${tag}]\n${inner.split('\n').map((line) => `> ${line}`).join('\n')}\n`
     }
     case 'bulletList':
-      return `\n${node.items.map((item) => `${' '.repeat(item.indent || 0)}* ${stringifyNode(item).trim()}`).join('\n')}\n`
+      return `\n${node.items.map((item) => {
+        const indentStr = ' '.repeat(item.indent || 0)
+        const marker = item.listType === 'ordered' ? `${item.order || 1}. ` : `${item.marker || '*'} `
+        return `${indentStr}${marker}${stringifyNode(item).trim()}`
+      }).join('\n')}\n`
     case 'orderedList':
-      return `\n${node.items.map((item, idx) => `${' '.repeat(item.indent || 0)}${idx + 1}. ${stringifyNode(item).trim()}`).join('\n')}\n`
+      return `\n${node.items.map((item, idx) => {
+        const indentStr = ' '.repeat(item.indent || 0)
+        const marker = item.listType === 'bullet' ? `${item.marker || '*'} ` : `${item.order || (idx + 1)}. `
+        return `${indentStr}${marker}${stringifyNode(item).trim()}`
+      }).join('\n')}\n`
     case 'table':
       return stringifyTable(node, stringifyNode)
     default:
