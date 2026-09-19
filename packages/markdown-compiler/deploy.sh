@@ -20,6 +20,5 @@ echo "Step 2: Publishing to NPM..."
 
 echo "Step 3: Tagging git commit..."
 git tag "$TAG"
-git push --tags
 
 echo "Successfully published and tagged ${TAG}!"
