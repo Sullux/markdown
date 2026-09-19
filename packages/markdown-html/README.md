@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.svg" alt="Markdown HTML" width="160" height="160" />
+</p>
+
 # @sullux/markdown-html
 
 A high-performance, zero-dependency, bidirectional Markdown ↔ HTML compiler supporting GitHub-Flavored Markdown (GFM), GitBook hints, pluggable code block renderers, built-in syntax highlighting, and custom image dimensions.

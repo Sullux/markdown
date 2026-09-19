@@ -73,6 +73,9 @@ const renderBlock = (node, options = {}) => {
     case 'hr': {
       return '<hr />\n'
     }
+    case 'html': {
+      return `${node.value}\n`
+    }
     default: {
       return ''
     }

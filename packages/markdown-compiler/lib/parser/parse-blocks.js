@@ -1,5 +1,6 @@
 const { parseCodeFenceHeader } = require('./code')
 const { parseSpecialBlocks, parseBlockHeadersAndLists } = require('./block-matchers')
+const { parseHtmlBlock } = require('./html')
 const { mapBlocks } = require('./map-blocks')
 
 const parseBlocks = (text) => {
@@ -14,6 +15,13 @@ const parseBlocks = (text) => {
     if (special.handled) {
       if (special.clearCurrent) currentBlock = null
       else if (special.newCurrent) currentBlock = special.newCurrent
+      continue
+    }
+
+    const htmlSpecial = parseHtmlBlock(line, currentBlock, blocks)
+    if (htmlSpecial.handled) {
+      if (htmlSpecial.clearCurrent) currentBlock = null
+      else if (htmlSpecial.newCurrent) currentBlock = htmlSpecial.newCurrent
       continue
     }
 

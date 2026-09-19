@@ -17,6 +17,7 @@ const orderedList = (items) => ({ type: 'orderedList', items })
 const table = (alignments, rows) => ({ type: 'table', alignments, rows })
 const hr = () => ({ type: 'hr' })
 const br = () => ({ type: 'br' })
+const html = (value) => ({ type: 'html', value })
 
 module.exports = {
   text,
@@ -38,4 +39,5 @@ module.exports = {
   table,
   hr,
   br,
+  html,
 }

@@ -239,3 +239,18 @@ test('image dimension parsing supports Obsidian, Pandoc/Gitlab, GitHub, and VS C
   assert.strictEqual(vscode.blocks[0].children[0].width, '300px')
   assert.strictEqual(vscode.blocks[0].children[0].height, '150px')
 })
+
+test('HTML block parsing preserves raw block HTML elements', () => {
+  const md = '<p align="center">\n  <img src="logo.svg" alt="Logo" width="160" height="160" />\n</p>\n\n# Heading'
+  const ast = parse(md)
+
+  assert.strictEqual(ast.blocks.length, 2)
+  assert.strictEqual(ast.blocks[0].type, 'html')
+  assert.ok(ast.blocks[0].value.includes('<p align="center">'))
+  assert.ok(ast.blocks[0].value.includes('</p>'))
+  assert.strictEqual(ast.blocks[1].type, 'header')
+
+  const stringified = stringify(ast)
+  assert.ok(stringified.includes('<p align="center">'))
+  assert.ok(stringified.includes('# Heading'))
+})

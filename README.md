@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.svg" alt="Sullux Markdown Suite" width="160" height="160" />
+</p>
+
 # Sullux Markdown Suite
 
 A suite of high-performance, local-first, zero-dependency Vanilla JavaScript packages for parsing, stringifying, converting, and rendering Markdown documents and static documentation websites.

@@ -42,6 +42,8 @@ const stringifyNode = (node) => {
       }).join('\n')}\n`
     case 'table':
       return stringifyTable(node, stringifyNode)
+    case 'html':
+      return `\n${node.value}\n`
     default:
       return ''
   }

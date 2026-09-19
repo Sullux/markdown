@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.svg" alt="Markdown Compiler" width="160" height="160" />
+</p>
+
 # @sullux/markdown-compiler
 
 A lightweight, zero-dependency, purely functional Markdown abstract syntax tree (AST) parser, stringifier, and construction DSL for JavaScript and Node.js.

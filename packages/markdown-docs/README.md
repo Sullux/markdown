@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.svg" alt="Markdown Docs" width="160" height="160" />
+</p>
+
 # @sullux/markdown-docs
 
 A zero-dependency, local-first static documentation website generator compiling GitBook-style Markdown documentation folders into fast, responsive, searchable HTML websites.

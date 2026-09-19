@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.svg" alt="Markdown HTML" width="160" height="160" />
+</p>
+
 # Introduction to `markdown-html`
 
 `@sullux/markdown-html` is a high-performance, zero-dependency, bidirectional Markdown $\leftrightarrow$ HTML compiler for JavaScript and Node.js.

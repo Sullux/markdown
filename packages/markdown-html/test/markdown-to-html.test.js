@@ -66,3 +66,10 @@ test('markdownToHtml - Strips YAML frontmatter', () => {
   const html = markdownToHtml(md)
   assert.strictEqual(html, '<h1 id="real-content">Real Content</h1>\n')
 })
+
+test('markdownToHtml - Preserves raw block HTML elements without escaping', () => {
+  const md = '<p align="center">\n  <img src="logo.svg" alt="Logo" width="160" height="160" />\n</p>\n\n# Real Content'
+  const html = markdownToHtml(md)
+  assert.ok(html.includes('<p align="center">\n  <img src="logo.svg" alt="Logo" width="160" height="160" />\n</p>\n'))
+  assert.ok(html.includes('<h1 id="real-content">Real Content</h1>\n'))
+})
