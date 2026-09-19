@@ -47,6 +47,11 @@ const processInlineNode = (node, style, currentInline, traverse) => {
       if (attrs.src) currentInline.push({ type: 'image', url: attrs.src, alt: attrs.alt || '' })
       return true
     }
+    if ((attrs.class || '').includes('math-inline') || (tagName === 'span' && attrs['data-latex'])) {
+      const latex = attrs['data-latex'] || (node.children ? node.children.map((c) => c.value || '').join('').replace(/^\$|\$$/g, '').trim() : '')
+      currentInline.push({ type: 'inlineMath', value: latex })
+      return true
+    }
     if (tagName === 'a') {
       const childTokens = []
       for (const child of node.children) traverse(child, nextStyle, childTokens)

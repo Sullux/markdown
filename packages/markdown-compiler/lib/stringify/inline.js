@@ -24,6 +24,8 @@ const stringifyInline = (node, stringifyNode) => {
     }
     case 'checkbox':
       return node.checked ? '[x] ' : '[ ] '
+    case 'inlineMath':
+      return `$${node.value}$`
     case 'br':
       return '  \n'
     default:

@@ -18,6 +18,8 @@ const table = (alignments, rows) => ({ type: 'table', alignments, rows })
 const hr = () => ({ type: 'hr' })
 const br = () => ({ type: 'br' })
 const html = (value) => ({ type: 'html', value })
+const inlineMath = (value) => ({ type: 'inlineMath', value })
+const mathBlock = (value) => ({ type: 'mathBlock', value })
 
 module.exports = {
   text,
@@ -40,4 +42,6 @@ module.exports = {
   hr,
   br,
   html,
+  inlineMath,
+  mathBlock,
 }

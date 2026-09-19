@@ -254,3 +254,45 @@ test('HTML block parsing preserves raw block HTML elements', () => {
   assert.ok(stringified.includes('<p align="center">'))
   assert.ok(stringified.includes('# Heading'))
 })
+
+test('math parsing - inlineMath and mathBlock with round-trip stringification', () => {
+  const inlineMd = 'The equation $E = mc^2$ is famous.'
+  const inlineAst = parse(inlineMd)
+  assert.strictEqual(inlineAst.blocks[0].children[1].type, 'inlineMath')
+  assert.strictEqual(inlineAst.blocks[0].children[1].value, 'E = mc^2')
+  assert.strictEqual(stringify(inlineAst).trim(), inlineMd)
+
+  const blockMd = '$$\n\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}\n$$'
+  const blockAst = parse(blockMd)
+  assert.strictEqual(blockAst.blocks[0].type, 'mathBlock')
+  assert.strictEqual(blockAst.blocks[0].value, '\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}')
+  assert.strictEqual(stringify(blockAst).trim(), blockMd)
+
+  const singleBlockMd = '$$E = mc^2$$'
+  const singleBlockAst = parse(singleBlockMd)
+  assert.strictEqual(singleBlockAst.blocks[0].type, 'mathBlock')
+  assert.strictEqual(singleBlockAst.blocks[0].value, 'E = mc^2')
+  assert.strictEqual(stringify(singleBlockAst).trim(), '$$\nE = mc^2\n$$')
+
+  const codeMathMd = '```math\n\\int_0^1 x dx\n```'
+  const codeMathAst = parse(codeMathMd)
+  assert.strictEqual(codeMathAst.blocks[0].type, 'codeBlock')
+  assert.strictEqual(codeMathAst.blocks[0].language, 'math')
+})
+
+test('math parsing - avoids false positives on currency and escaped symbols', () => {
+  const currencyMd = 'Cost is $10 and profit is $20.'
+  const currencyAst = parse(currencyMd)
+  const hasMath = currencyAst.blocks[0].children.some((c) => c.type === 'inlineMath')
+  assert.strictEqual(hasMath, false)
+
+  const singleDollarMd = 'It costs $5.'
+  const singleDollarAst = parse(singleDollarMd)
+  const hasSingleMath = singleDollarAst.blocks[0].children.some((c) => c.type === 'inlineMath')
+  assert.strictEqual(hasSingleMath, false)
+
+  const escapedMd = 'Here is \\$not math\\$.'
+  const escapedAst = parse(escapedMd)
+  const hasEscapedMath = escapedAst.blocks[0].children.some((c) => c.type === 'inlineMath')
+  assert.strictEqual(hasEscapedMath, false)
+})

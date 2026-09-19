@@ -31,6 +31,27 @@ const parseInlineTags = (text, index, parseInline) => {
     return { token: { type: 'br' }, consumedLength: 3 }
   }
 
+  if (text.startsWith('$', index) && !text.startsWith('$$', index)) {
+    const isEscaped = index > 0 && text[index - 1] === '\\'
+    const nextChar = text[index + 1]
+    const hasValidOpen = nextChar && ![' ', '\t', '\n', '$'].includes(nextChar)
+    if (!isEscaped && hasValidOpen) {
+      let close = index + 1
+      while (close < text.length) {
+        if (text[close] === '$' && text[close - 1] !== '\\') {
+          const prevChar = text[close - 1]
+          if (![' ', '\t', '\n'].includes(prevChar)) {
+            const mathValue = text.slice(index + 1, close)
+            if (!mathValue.includes('\n')) {
+              return { token: { type: 'inlineMath', value: mathValue }, consumedLength: close + 1 - index }
+            }
+          }
+        }
+        close++
+      }
+    }
+  }
+
   return null
 }
 

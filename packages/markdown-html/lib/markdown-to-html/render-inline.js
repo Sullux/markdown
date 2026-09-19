@@ -1,6 +1,6 @@
 const { escapeHtml } = require('./escape')
 
-const renderInline = (tokens) => {
+const renderInline = (tokens, options = {}) => {
   if (!tokens) return ''
   if (!Array.isArray(tokens)) return escapeHtml(tokens)
 
@@ -13,15 +13,15 @@ const renderInline = (tokens) => {
         case 'text':
           return escapeHtml(token.value)
         case 'bold':
-          return `<strong>${renderInline(token.children)}</strong>`
+          return `<strong>${renderInline(token.children, options)}</strong>`
         case 'italic':
-          return `<em>${renderInline(token.children)}</em>`
+          return `<em>${renderInline(token.children, options)}</em>`
         case 'strikethrough':
-          return `<del>${renderInline(token.children)}</del>`
+          return `<del>${renderInline(token.children, options)}</del>`
         case 'code':
           return `<code>${escapeHtml(token.value)}</code>`
         case 'link':
-          return `<a href="${escapeHtml(token.url)}">${renderInline(token.children)}</a>`
+          return `<a href="${escapeHtml(token.url)}">${renderInline(token.children, options)}</a>`
         case 'wikilink':
           return `<a href="${escapeHtml(token.target)}">${escapeHtml(token.display)}</a>`
         case 'image': {
@@ -36,6 +36,10 @@ const renderInline = (tokens) => {
         }
         case 'checkbox':
           return `<input type="checkbox"${token.checked ? ' checked' : ''} disabled /> `
+        case 'inlineMath': {
+          if (options.inlineMathRenderer) return options.inlineMathRenderer(token, options)
+          return `<span class="math-inline" data-latex="${escapeHtml(token.value)}">$${escapeHtml(token.value)}$</span>`
+        }
         case 'br':
           return '<br />'
         default:

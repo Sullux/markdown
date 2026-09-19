@@ -8,13 +8,13 @@ const renderBlock = (node, options = {}) => {
 
   switch (node.type) {
     case 'header': {
-      const text = renderInline(node.children)
+      const text = renderInline(node.children, options)
       const rawText = node.children ? node.children.map((c) => (c.type === 'text' ? c.value : '')).join('') : ''
       const slug = (options.slugify || slugify)(rawText, options.usedSlugs)
       return `<h${node.level} id="${slug}">${text}</h${node.level}>\n`
     }
     case 'paragraph': {
-      return `<p>${renderInline(node.children)}</p>\n`
+      return `<p>${renderInline(node.children, options)}</p>\n`
     }
     case 'codeBlock': {
       const lang = node.language || ''
@@ -36,11 +36,11 @@ const renderBlock = (node, options = {}) => {
       return `<div class="callout callout-${style}">\n<div class="callout-title">${title}</div>\n${innerHtml}</div>\n`
     }
     case 'bulletList': {
-      const itemsHtml = node.items ? node.items.map((item) => `<li>${renderInline(item)}</li>\n`).join('') : ''
+      const itemsHtml = node.items ? node.items.map((item) => `<li>${renderInline(item, options)}</li>\n`).join('') : ''
       return `<ul>\n${itemsHtml}</ul>\n`
     }
     case 'orderedList': {
-      const itemsHtml = node.items ? node.items.map((item) => `<li>${renderInline(item)}</li>\n`).join('') : ''
+      const itemsHtml = node.items ? node.items.map((item) => `<li>${renderInline(item, options)}</li>\n`).join('') : ''
       return `<ol>\n${itemsHtml}</ol>\n`
     }
     case 'table': {
@@ -57,7 +57,7 @@ const renderBlock = (node, options = {}) => {
           .map((cell, colIdx) => {
             const align = alignments[colIdx] || 'default'
             const alignAttr = align !== 'default' ? ` align="${align}"` : ''
-            return `<${cellTag}${alignAttr}>${renderInline(cell)}</${cellTag}>`
+            return `<${cellTag}${alignAttr}>${renderInline(cell, options)}</${cellTag}>`
           })
           .join('')
         return `<tr>${cells}</tr>\n`
@@ -75,6 +75,11 @@ const renderBlock = (node, options = {}) => {
     }
     case 'html': {
       return `${node.value}\n`
+    }
+    case 'mathBlock': {
+      const mathRenderer = options.mathBlockRenderer || options.codeRenderers?.math
+      if (mathRenderer) return mathRenderer(node, options)
+      return `<div class="math-display" data-latex="${escapeHtml(node.value)}">$$\n${escapeHtml(node.value)}\n$$</div>\n`
     }
     default: {
       return ''

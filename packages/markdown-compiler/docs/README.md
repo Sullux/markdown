@@ -29,9 +29,11 @@ Document
     ├── bulletList (items: Array of Inline Nodes, with indent, depth, listType)
     ├── orderedList (items: Array of Inline Nodes, with indent, depth, listType, order)
     ├── codeBlock (language, languageMetadata, value)
+    ├── mathBlock (value)
     ├── blockquote (children)
     ├── callout (style, children)
     ├── table (alignments, rows)
+    ├── html (value)
     └── hr
 ```
 

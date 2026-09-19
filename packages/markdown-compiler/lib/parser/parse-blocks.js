@@ -1,7 +1,10 @@
 const { parseCodeFenceHeader } = require('./code')
 const { parseSpecialBlocks, parseBlockHeadersAndLists } = require('./block-matchers')
 const { parseHtmlBlock } = require('./html')
+const { parseMathBlock } = require('./math')
 const { mapBlocks } = require('./map-blocks')
+
+const blockMatchers = [parseSpecialBlocks, parseHtmlBlock, parseMathBlock]
 
 const parseBlocks = (text) => {
   const lines = text.split('\n')
@@ -11,17 +14,10 @@ const parseBlocks = (text) => {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
 
-    const special = parseSpecialBlocks(line, currentBlock, blocks)
+    const special = blockMatchers.reduce((acc, fn) => acc.handled ? acc : fn(line, currentBlock, blocks), { handled: false })
     if (special.handled) {
       if (special.clearCurrent) currentBlock = null
       else if (special.newCurrent) currentBlock = special.newCurrent
-      continue
-    }
-
-    const htmlSpecial = parseHtmlBlock(line, currentBlock, blocks)
-    if (htmlSpecial.handled) {
-      if (htmlSpecial.clearCurrent) currentBlock = null
-      else if (htmlSpecial.newCurrent) currentBlock = htmlSpecial.newCurrent
       continue
     }
 

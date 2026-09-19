@@ -21,6 +21,13 @@ const processBlockNode = (node, style, blocks, currentInline, traverse, toAst) =
     return true
   }
 
+  if ((attrs.class || '').includes('math-display') || (tagName !== 'span' && attrs['data-latex'])) {
+    flushInline()
+    const latex = attrs['data-latex'] || (node.children ? node.children.map((c) => c.value || '').join('').replace(/^\$\$|\$\$$/g, '').trim() : '')
+    blocks.push({ type: 'mathBlock', value: latex })
+    return true
+  }
+
   const headerMatch = tagName.match(/^h([1-6])$/)
   if (headerMatch) {
     flushInline()

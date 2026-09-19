@@ -44,6 +44,8 @@ const stringifyNode = (node) => {
       return stringifyTable(node, stringifyNode)
     case 'html':
       return `\n${node.value}\n`
+    case 'mathBlock':
+      return `\n$$\n${node.value}\n$$\n`
     default:
       return ''
   }

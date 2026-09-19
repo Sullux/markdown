@@ -15,6 +15,8 @@ const html = markdownToHtml(markdown, options)
 * **`markdown`** (`string`): The raw Markdown source text, optionally containing YAML frontmatter.
 * **`options`** (`Object`, optional):
   * **`options.codeRenderers`** (`Record<string, Function>`): Map of language tags to custom code block renderers `(node, options) => string`.
+  * **`options.mathBlockRenderer`** (`Function`): Custom renderer for display math blocks `(node, options) => string`. Defaults to `options.codeRenderers.math` if provided, otherwise semantic `<div class="math-display">`.
+  * **`options.inlineMathRenderer`** (`Function`): Custom renderer for inline math `(token, options) => string`. Defaults to semantic `<span class="math-inline">`.
   * **`options.tokenizers`** (`Record<string, Function>`): Map of language names to custom syntax tokenizers `(code) => string`.
   * **`options.slugify`** (`Function`): Custom heading slug generator `(rawText, usedSlugsSet) => string`.
 
@@ -101,3 +103,25 @@ Rendered HTML:
 
 ### 7. Frontmatter Stripping
 Leading YAML frontmatter enclosed in `---` is parsed and stripped from the rendered HTML output so that metadata is not leaked into presentation prose.
+
+### 8. Math Rendering (LaTeX)
+Inline math (`$...$`) and display math blocks (`$$...$$`) render to semantic containers with `data-latex` attributes by default:
+
+```markdown
+Formula $E = mc^2$ in prose.
+
+$$
+\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
+```
+
+Rendered HTML:
+```html
+<p>Formula <span class="math-inline" data-latex="E = mc^2">$E = mc^2$</span> in prose.</p>
+
+<div class="math-display" data-latex="\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}">$$
+\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$</div>
+```
+
+Custom math renderers can be supplied via `options.mathBlockRenderer`, `options.inlineMathRenderer`, or `options.codeRenderers.math`.

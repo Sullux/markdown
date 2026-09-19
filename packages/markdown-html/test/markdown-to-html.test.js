@@ -73,3 +73,31 @@ test('markdownToHtml - Preserves raw block HTML elements without escaping', () =
   assert.ok(html.includes('<p align="center">\n  <img src="logo.svg" alt="Logo" width="160" height="160" />\n</p>\n'))
   assert.ok(html.includes('<h1 id="real-content">Real Content</h1>\n'))
 })
+
+test('markdownToHtml - Renders inline math and display math with semantic container defaults', () => {
+  const md = 'Formula $E = mc^2$ in text.\n\n$$\n\\frac{a}{b}\n$$'
+  const html = markdownToHtml(md)
+  assert.ok(html.includes('<span class="math-inline" data-latex="E = mc^2">$E = mc^2$</span>'))
+  assert.ok(html.includes('<div class="math-display" data-latex="\\frac{a}{b}">$$\n\\frac{a}{b}\n$$</div>'))
+})
+
+test('markdownToHtml - Supports custom math block and inline math renderers', () => {
+  const md = 'Formula $x^2$ here.\n\n$$y = mx + b$$'
+  const html = markdownToHtml(md, {
+    inlineMathRenderer: (token) => `<math-inline>${token.value}</math-inline>`,
+    mathBlockRenderer: (node) => `<math-block>${node.value}</math-block>\n`,
+  })
+  assert.ok(html.includes('<math-inline>x^2</math-inline>'))
+  assert.ok(html.includes('<math-block>y = mx + b</math-block>'))
+})
+
+test('markdownToHtml - Code renderers math hook handles both code blocks and display math fallback', () => {
+  const md = '```math\ncode_formula\n```\n\n$$block_formula$$'
+  const html = markdownToHtml(md, {
+    codeRenderers: {
+      math: (node) => `<rendered-math>${node.value}</rendered-math>\n`,
+    },
+  })
+  assert.ok(html.includes('<rendered-math>code_formula</rendered-math>'))
+  assert.ok(html.includes('<rendered-math>block_formula</rendered-math>'))
+})

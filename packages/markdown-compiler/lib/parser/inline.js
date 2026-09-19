@@ -61,24 +61,10 @@ const parseInline = (text) => {
       continue
     }
 
-    let nextTagIndex = text.length
-    const nextWiki = text.indexOf('[[', index)
-    const nextBold = text.indexOf('**', index)
-    const nextItalic = text.indexOf('*', index)
-    const nextStrike = text.indexOf('~~', index)
-    const nextCode = text.indexOf('`', index)
-    const nextLink = text.indexOf('[', index)
-    const nextImage = text.indexOf('![', index)
-    const nextBr = text.indexOf('  \n', index)
-
-    if (nextWiki !== -1 && nextWiki > index) nextTagIndex = Math.min(nextTagIndex, nextWiki)
-    if (nextBold !== -1 && nextBold > index) nextTagIndex = Math.min(nextTagIndex, nextBold)
-    if (nextItalic !== -1 && nextItalic > index) nextTagIndex = Math.min(nextTagIndex, nextItalic)
-    if (nextStrike !== -1 && nextStrike > index) nextTagIndex = Math.min(nextTagIndex, nextStrike)
-    if (nextCode !== -1 && nextCode > index) nextTagIndex = Math.min(nextTagIndex, nextCode)
-    if (nextLink !== -1 && nextLink > index) nextTagIndex = Math.min(nextTagIndex, nextLink)
-    if (nextImage !== -1 && nextImage > index) nextTagIndex = Math.min(nextTagIndex, nextImage)
-    if (nextBr !== -1 && nextBr > index) nextTagIndex = Math.min(nextTagIndex, nextBr)
+    const candidateIndices = ['[[', '**', '*', '~~', '`', '[', '![', '  \n', '$']
+      .map((marker) => text.indexOf(marker, index))
+      .filter((pos) => pos > index)
+    const nextTagIndex = candidateIndices.length > 0 ? Math.min(...candidateIndices) : text.length
 
     tokens.push({ type: 'text', value: text.slice(index, nextTagIndex) })
     index = nextTagIndex

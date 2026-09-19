@@ -159,3 +159,10 @@ test('HTML to Markdown collapses empty columns/rows and flattens layout tables',
   const md = htmlToMarkdown(html)
   assert.strictEqual(md, 'My nested cell content')
 })
+
+test('HTML to Markdown translates math-inline and math-display containers', () => {
+  const html = '<p>Formula <span class="math-inline" data-latex="E = mc^2">$E = mc^2$</span> here.</p><div class="math-display" data-latex="\\frac{a}{b}">$$\\frac{a}{b}$$</div>'
+  const md = htmlToMarkdown(html)
+  assert.ok(md.includes('$E = mc^2$'))
+  assert.ok(md.includes('$$\n\\frac{a}{b}\n$$'))
+})
