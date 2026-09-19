@@ -5,35 +5,32 @@
   height="275"
 >
   <path
-    fill="none"
+    fill="#b0b0b0"
     stroke="#6040ff"
     stroke-width="15"
     stroke-linecap="round"
-    stroke-linejoin="miter"
     d="
-      M 10 25
-      l 250 0
+      M 100 20
+      l 125 0
+      l 0 235
+      l -175 0
+      l 0 -185
+      l 50 -50
     "
   />
-  <rect
-    fill="#6040ff"
-    x="75"
-    y="50"
-    width="125"
-    height="200"
-    rx="10"
-  />
   <path
-    fill="#b0b060"
-    stroke="#b0b060"
+    stroke="#e07800"
     stroke-width="15"
     stroke-linecap="round"
-    stroke-linejoin="miter"
     d="
-      M 10 125
-      l 250 0
-      M 10 175
-      l 250 0
+      M 65 100
+      l 150 0
+      M 60 175
+      l 150 0
+      M 110 65
+      l -10 145
+      M 175 65
+      l -10 145
     "
   />
 </svg>

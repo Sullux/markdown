@@ -4,48 +4,72 @@ A suite of high-performance, local-first, zero-dependency Vanilla JavaScript pac
 
 Designed for low cognitive load and strict auditability, the Sullux Markdown Suite provides a clean document processing pipeline with zero external runtime dependencies.
 
+🌐 **Official Website:** [https://sullux.com/projects/markdown](https://sullux.com/projects/markdown)
+
 ---
 
 ## Projects Index
 
 ### 1. [@sullux/markdown-compiler](./packages/markdown-compiler/README.md)
 
-A lightweight, purely functional Markdown abstract syntax tree (AST) parser, stringifier, and construction DSL. Handles GFM extensions, frontmatter extraction, code block metadata, callout boxes, task lists, GFM tables, and multi-syntax image dimensions.
+Designed around strict local-first, low-overhead principles, `@sullux/markdown-compiler` provides a standard, timeless intermediate document representation between rich sender formats (such as HTML or platform-specific messaging APIs) and consumer presentation surfaces (such as web dashboards, static documentation sites, or terminal interfaces).
 
-#### Quickstart
+It features symmetric round-trip conversion between Markdown text and a clean, two-level AST, a declarative `Node.*` builder DSL for programmatic document construction, and comprehensive support for GitHub Flavored Markdown (GFM) tables, task lists, callout boxes, YAML frontmatter, code block metadata, and multi-syntax image dimensions.
+
+#### Quick Start
+
+##### Installation
+
+```bash
+yarn add @sullux/markdown-compiler
+```
+
+##### Usage
 
 ```javascript
 const { parse, stringify, Node } = require('@sullux/markdown-compiler')
 
-// Parse raw Markdown to a structured AST
-const ast = parse('# Title\n\nThis is **bold** text.')
+// Parse raw Markdown into a structured AST
+const ast = parse('# Hello World\n\nWelcome to **sullux**.')
 
-// Construct an AST programmatically with Node builders
+// Construct or manipulate AST nodes programmatically
 const doc = {
+  frontmatter: { title: 'Specification' },
   blocks: [
-    Node.header(1, [Node.text('Sullux Markdown')]),
-    Node.paragraph([Node.bold([Node.text('Zero-dependency')]), Node.text(' AST toolchain.')]),
+    Node.header(1, [Node.text('Specification')]),
+    Node.paragraph([Node.text('Auditable, zero-dependency Markdown compiler.')]),
   ],
 }
 
 // Compile AST back to clean Markdown
-const markdownText = stringify(doc)
+const markdown = stringify(doc)
+console.log(markdown)
 ```
 
-👉 **[Read full `@sullux/markdown-compiler` Documentation](./packages/markdown-compiler/README.md)**
+📖 **[Read `@sullux/markdown-compiler` Documentation](https://sullux.com/projects/markdown/markdown-compiler/)**
 
 ---
 
 ### 2. [@sullux/markdown-html](./packages/markdown-html/README.md)
 
-A high-performance, bidirectional Markdown ↔ HTML compiler. Converts Markdown ASTs directly into semantic HTML with pluggable code block renderers (e.g. `mermaid`), zero-dependency syntax highlighting for common languages (`js`, `json`, `yaml`, `bash`, `html`, `sql`), and inline CSS image dimension styling. Also parses raw HTML back into clean Markdown.
+Part of the Sullux markdown suite, `@sullux/markdown-html` relies on `@sullux/markdown-compiler` to deliver fast, bidirectional conversion between Markdown and clean, semantic HTML. It transforms Markdown ASTs into HTML with auto-slugified heading IDs, callout boxes, task lists, GFM tables, and multi-syntax image dimensions styled as inline CSS. It also parses arbitrary HTML documents, emails, or CMS content back into canonical GFM Markdown with style normalization and layout table flattening.
 
-#### Quickstart
+Key capabilities include pluggable code block renderers for diagrams (such as Mermaid or Graphviz) and zero-dependency compile-time syntax highlighting for common languages (`js`, `json`, `yaml`, `bash`, `html`, `sql`).
+
+#### Quick Start
+
+##### Installation
+
+```bash
+yarn add @sullux/markdown-html
+```
+
+##### Usage
 
 ```javascript
 const { markdownToHtml, htmlToMarkdown } = require('@sullux/markdown-html')
 
-// Convert Markdown to HTML with custom code renderers
+// Convert Markdown to semantic HTML with custom code renderers
 const html = markdownToHtml('# Hello\n\n![Diagram|400x200](arch.png)', {
   codeRenderers: {
     mermaid: (node) => `<div class="mermaid">${node.value}</div>\n`,
@@ -56,36 +80,48 @@ const html = markdownToHtml('# Hello\n\n![Diagram|400x200](arch.png)', {
 const markdown = htmlToMarkdown('<h1>Hello</h1><p>This is <strong>bold</strong> text.</p>')
 ```
 
-👉 **[Read full `@sullux/markdown-html` Documentation](./packages/markdown-html/README.md)**
+📖 **[Read `@sullux/markdown-html` Documentation](https://sullux.com/projects/markdown/markdown-html/)**
 
 ---
 
 ### 3. [@sullux/markdown-docs](./packages/markdown-docs/README.md)
 
-A static documentation site generator that compiles GitBook-style Markdown documentation directories into fast, responsive, searchable HTML websites. Automatically parses `SUMMARY.md` navigation hierarchies, embeds client-side search, handles dark/light theme toggling, and copies static assets.
+Built on `@sullux/markdown-compiler` and `@sullux/markdown-html`, `@sullux/markdown-docs` compiles directories of Markdown files into production-ready static documentation sites with zero third-party dependencies. It operates both as a standalone CLI utility and as a Node.js library.
 
-#### Quickstart (CLI)
+It features automatic `SUMMARY.md` navigation hierarchy parsing, embedded client-side search, a responsive 3-column layout with mobile navigation drawers, native dual light/dark themes with system preference tracking and toggle persistence, static asset bundling, and declarative `docs.yaml` site configuration.
+
+#### Quick Start
+
+##### Installation
+
+```bash
+yarn add @sullux/markdown-docs
+# or install globally
+yarn global add @sullux/markdown-docs
+```
+
+##### Usage (CLI)
 
 ```bash
 # Generate static HTML site from a docs directory
 markdown-docs -i ./docs -o ./_site -t "Project Documentation"
 ```
 
-#### Quickstart (Programmatic Import)
+##### Usage (Programmatic)
 
 ```javascript
-const { generateDocs } = require('@sullux/markdown-docs')
+const { generateSite } = require('@sullux/markdown-docs')
 
-const result = generateDocs({
+const result = generateSite({
   input: './docs',
   output: './dist',
-  title: 'Sullux API Reference',
+  baseUrl: '/docs',
 })
 
 console.log(`Generated ${result.pageCount} pages at ${result.output}`)
 ```
 
-👉 **[Read full `@sullux/markdown-docs` Documentation](./packages/markdown-docs/README.md)**
+📖 **[Read `@sullux/markdown-docs` Documentation](https://sullux.com/projects/markdown/markdown-docs/)**
 
 ---
 

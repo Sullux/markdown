@@ -1,11 +1,11 @@
-title: "Markdown Docs"
+title: "Markdown HTML"
 links:
   - title: "Website"
-    url: "https://sullux.com/projects/markdown/markdown-docs/"
+    url: "https://sullux.com/projects/markdown/markdown-html/"
   - title: "GitHub"
-    url: "https://github.com/Sullux/markdown/tree/main/packages/markdown-docs"
+    url: "https://github.com/Sullux/markdown/tree/main/packages/markdown-html"
   - title: "NPM"
-    url: "https://www.npmjs.com/package/@sullux/markdown-docs"
+    url: "https://www.npmjs.com/package/@sullux/markdown-html"
 theme:
   light:
     bg: "#ffffff"

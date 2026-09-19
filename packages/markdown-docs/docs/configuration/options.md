@@ -4,15 +4,16 @@ Every configuration option in `@sullux/markdown-docs` directly controls specific
 
 ## Configuration Options
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `title` | `string` | Site product title. Leave empty (`""`) or omit when using a logo containing product name text. |
-| `logo` | `string \| object` | Asset path/SVG string, or `{ light: "...", dark: "..." }` object. |
-| `favicon` | `string` | Asset path or URL to icon file. |
-| `links` | `array` | Header external links list `[{ title: "...", url: "..." }]`. |
-| `baseUrl` | `string` | Base path URL prefix for hosting in subdirectories. |
-| `output` | `string` | Output build directory. |
-| `theme` | `object` | Custom color overrides (`bg`, `accent`, `codeBg`, `codeText`). |
+| Option | Type | Description | Default |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Product or site name displayed in header & `<title>` tag. Leave empty (`""`) or omit when using a logo image containing the product name. | `""` |
+| `output` | `string` | Relative or absolute path to output build directory. | `<input>/_site` |
+| `baseUrl` | `string` | Base URL path prefix for hosting in subdirectories. | `""` |
+| `logo` | `string \| object` | Asset path/SVG string, or `{ light: "...", dark: "..." }` object for automatic theme switching. | `""` |
+| `favicon` | `string` | Asset path or URL to icon file. | Default book emoji (`📚`) |
+| `links` | `array` | Header external links array `[{ title: "...", url: "..." }]`. | `[]` |
+| `theme.light` | `object` | Light theme color overrides (`bg`, `accent`, `codeBg`, `codeText`). | Built-in light colors |
+| `theme.dark` | `object` | Dark theme color overrides (`bg`, `accent`, `codeBg`, `codeText`). | Built-in dark colors |
 
 ---
 

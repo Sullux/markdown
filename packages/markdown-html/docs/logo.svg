@@ -4,37 +4,30 @@
   width="275"
   height="275"
 >
-  <rect
+  <path
+    fill="none"
     stroke="#6040ff"
     stroke-width="15"
-    fill="#b0b0b0"
-    x="25"
-    y="25"
-    width="225"
-    height="225"
-    rx="15"
-  />
-  <path
-    stroke="#e07800"
-    stroke-width="15"
     stroke-linecap="round"
+    stroke-linejoin="round"
     d="
-      M 40 100
-      l 150 0
-      M 35 175
-      l 150 0
-      M 85 65
-      l -10 145
-      M 150 65
-      l -10 145
+      M 175 60
+      l 75 75
+      l -75 75
     "
   />
   <path
     stroke="#e07800"
-    stroke-width="25"
+    stroke-width="15"
     stroke-linecap="round"
     d="
-      M 235 65
+      M 15 100
+      l 150 0
+      M 10 175
+      l 150 0
+      M 60 65
+      l -10 145
+      M 125 65
       l -10 145
     "
   />
