@@ -1,6 +1,6 @@
 {
   "name": "@sullux/markdown-html",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A high-performance, bidirectional Markdown <-> HTML compiler supporting GFM, GitBook hints, syntax highlighting, and custom image dimensions.",
   "main": "./index.js",
   "scripts": {
@@ -36,6 +36,6 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@sullux/markdown-compiler": "^1.0.0"
+    "@sullux/markdown-compiler": "^1.0.2"
   }
 }

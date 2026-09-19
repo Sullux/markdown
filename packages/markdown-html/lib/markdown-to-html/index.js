@@ -3,7 +3,7 @@ const { renderBlock } = require('./render-block')
 
 const markdownToHtml = (markdown, options = {}) => {
   if (!markdown) return ''
-  const ast = parse(markdown)
+  const ast = typeof markdown === 'string' ? parse(markdown) : markdown
   const ctx = { ...options, usedSlugs: new Set() }
   return ast.blocks.map((block) => renderBlock(block, ctx)).join('')
 }
