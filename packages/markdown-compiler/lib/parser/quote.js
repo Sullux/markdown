@@ -1,7 +1,16 @@
+const canInterruptLazy = (line) => {
+  if (/^ {0,3}>/.test(line)) return true
+  if (/^ {0,3}(#{1,6})(?:[ \t]|$)/.test(line)) return true
+  if (/^ {0,3}(`{3,}|~{3,})/.test(line)) return true
+  if (/^ {0,3}([*\-_])[ \t]*(?:\1[ \t]*){2,}$/.test(line)) return true
+  if (/^ {0,3}(?:[*+-]|\d{1,9}[.)])[ \t]+/.test(line)) return true
+  return false
+}
+
 const parseQuote = (lines, startIndex, parseBlocks) => {
   const first = lines[startIndex]
   const isHint = first.startsWith('{% hint')
-  const isQuote = first.startsWith('>')
+  const isQuote = /^ {0,3}>/.test(first)
   if (!isHint && !isQuote) return null
 
   if (isHint) {
@@ -19,12 +28,16 @@ const parseQuote = (lines, startIndex, parseBlocks) => {
 
   const innerLines = []
   let i = startIndex
+  let lastWasBlank = false
+
   while (i < lines.length) {
     const line = lines[i]
-    if (line.startsWith('>')) {
-      innerLines.push(line.replace(/^>\s?/, ''))
+    if (/^ {0,3}>/.test(line)) {
+      const content = line.replace(/^ {0,3}>[ \t]?/, '')
+      innerLines.push(content)
+      lastWasBlank = content.trim().length === 0
       i++
-    } else if (line.trim() && !line.startsWith('#') && !line.startsWith('```') && !line.startsWith('- ') && !line.startsWith('* ')) {
+    } else if (line.trim() && !lastWasBlank && !canInterruptLazy(line)) {
       innerLines.push(line)
       i++
     } else {
