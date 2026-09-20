@@ -21,7 +21,9 @@ const isBlockStart = (lines, idx, parseBlocks) => {
   if (parseTable(lines, idx)) return true
   if (parseQuote(lines, idx, parseBlocks)) return true
   const listRes = parseList(lines, idx, parseBlocks)
-  if (listRes && listRes.block.children[0]?.children?.length > 0) return true
+  if (listRes && listRes.block.children[0]?.children?.length > 0) {
+    return listRes.block.type !== 'orderedList' || (listRes.block.start || 1) === 1
+  }
   return false
 }
 
