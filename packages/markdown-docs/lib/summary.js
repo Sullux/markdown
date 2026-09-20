@@ -4,7 +4,7 @@ const { parse } = require('@sullux/markdown-compiler')
 
 const normalizeHref = (url) => {
   if (!url) return '#'
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/') || url.startsWith('#')) return url
+  if (['http://', 'https://', '/', '#'].some((p) => url.startsWith(p))) return url
   return url
     .replace(/(?:^|\/)README\.md(#.*)?$/i, (match) => match.replace(/README\.md/i, 'index.html'))
     .replace(/\.md(#.*)?$/, (match) => match.replace(/\.md/, '.html'))
@@ -19,7 +19,7 @@ const parseSummaryMd = (content) => {
     const items = []
     const listChildren = listNode.children || listNode.items || []
     for (const item of listChildren) {
-      let linkInfo = null
+      let linkInfo = null, textTitle = ''
       const subLists = []
       const itemBlocks = item.children || (Array.isArray(item) ? [{ type: 'paragraph', children: item }] : [])
 
@@ -27,26 +27,26 @@ const parseSummaryMd = (content) => {
         if (child.type === 'paragraph') {
           for (const node of child.children || []) {
             if (node.type === 'link') {
-              const title = node.children ? node.children.map((c) => c.value || '').join('') : ''
+              const title = (node.children || []).map((c) => c.value || '').join('')
               linkInfo = { title, href: normalizeHref(node.url) }
-            }
+            } else if (node.type === 'text') textTitle += node.value || ''
           }
+          if (!textTitle) textTitle = (child.children || []).map((c) => c.value || '').join('')
         } else if (child.type === 'bulletList' || child.type === 'orderedList') {
           subLists.push(...extractItems(child))
         }
       }
 
-      if (linkInfo) {
-        items.push({ ...linkInfo, children: subLists })
-      }
+      if (linkInfo) items.push({ ...linkInfo, children: subLists })
+      else if (textTitle.trim()) items.push({ title: textTitle.trim(), href: null, children: subLists })
     }
     return items
   }
 
   for (const block of ast.blocks) {
     if (block.type === 'header' && block.level > 1) {
-      const sectionTitle = block.children ? block.children.map((c) => c.value || '').join('') : ''
-      currentSection = { type: 'section', title: sectionTitle, items: [] }
+      const title = (block.children || []).map((c) => c.value || '').join('')
+      currentSection = { type: 'section', title, items: [] }
       nav.push(currentSection)
     } else if (block.type === 'bulletList' || block.type === 'orderedList') {
       const listItems = extractItems(block)
@@ -85,9 +85,7 @@ const scanDir = (dir, rootDir = dir) => {
 
 const getNavigationTree = (inputDir) => {
   const summaryPath = path.join(inputDir, 'SUMMARY.md')
-  if (fs.existsSync(summaryPath)) {
-    return parseSummaryMd(fs.readFileSync(summaryPath, 'utf8'))
-  }
+  if (fs.existsSync(summaryPath)) return parseSummaryMd(fs.readFileSync(summaryPath, 'utf8'))
   return scanDir(inputDir)
 }
 

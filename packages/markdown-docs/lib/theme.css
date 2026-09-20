@@ -357,6 +357,16 @@ body {
   border-left-color: var(--accent-color);
 }
 
+.nav-label {
+  display: block;
+  padding: 0.4rem 0.65rem;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.35;
+  cursor: default;
+}
+
 .nav-sub {
   list-style: none;
   padding-left: 0.75rem;

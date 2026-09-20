@@ -25,6 +25,28 @@ test('markdown-docs - parseSummaryMd extracts navigation items', () => {
   assert.strictEqual(tree[3].href, 'guide/concepts.html')
 })
 
+test('markdown-docs - parseSummaryMd supports unlinked category labels with nested sub-items', () => {
+  const summaryContent = `# Summary
+
+* [Overview](README.md)
+* Packages
+  * [markdown-compiler](/projects/markdown/markdown-compiler)
+  * [markdown-html](/projects/markdown/markdown-html)
+`
+  const tree = parseSummaryMd(summaryContent)
+  assert.strictEqual(tree.length, 2)
+  assert.strictEqual(tree[0].title, 'Overview')
+  assert.strictEqual(tree[0].href, 'index.html')
+
+  assert.strictEqual(tree[1].title, 'Packages')
+  assert.strictEqual(tree[1].href, null)
+  assert.strictEqual(tree[1].children.length, 2)
+  assert.strictEqual(tree[1].children[0].title, 'markdown-compiler')
+  assert.strictEqual(tree[1].children[0].href, '/projects/markdown/markdown-compiler')
+  assert.strictEqual(tree[1].children[1].title, 'markdown-html')
+  assert.strictEqual(tree[1].children[1].href, '/projects/markdown/markdown-html')
+})
+
 test('markdown-docs - parseArgs correctly parses CLI options', () => {
   const args = ['-i', '/docs', '-o', '/site', '-b', '/base/', '-t', 'My Docs']
   const opts = parseArgs(args)

@@ -1,58 +1,12 @@
-const path = require('node:path')
 const { getCss } = require('./theme')
 const { getSearchScript } = require('./search')
 const { SVGS } = require('./icons')
-
-const normalizeTargetHref = (href) => {
-  if (!href) return '#'
-  if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('/') || href.startsWith('#') || href.startsWith('mailto:')) {
-    return href
-  }
-  return href
-    .replace(/(?:^|\/)README\.(?:md|html)(#.*)?$/i, (match) => match.replace(/README\.(?:md|html)/i, 'index.html'))
-    .replace(/\.md(#.*)?$/, (match) => match.replace(/\.md/, '.html'))
-}
-
-const calcRelativeHref = (currentHref, targetHref) => {
-  if (!targetHref) return '#'
-  const normalizedTarget = normalizeTargetHref(targetHref)
-  if (normalizedTarget.startsWith('http://') || normalizedTarget.startsWith('https://') || normalizedTarget.startsWith('/') || normalizedTarget.startsWith('#') || normalizedTarget.startsWith('mailto:')) {
-    return normalizedTarget
-  }
-  const normalizedCurrent = normalizeTargetHref(currentHref)
-  const rel = path.relative(path.dirname(normalizedCurrent), normalizedTarget)
-  return rel || './'
-}
-
-const renderNavTree = (items, currentHref) => {
-  if (!items?.length) return ''
-  let html = '', group = []
-  const flushGroup = () => {
-    if (!group.length) return ''
-    const list = `<ul class="nav-list">\n` + group.map((item) => {
-      const active = normalizeTargetHref(item.href) === normalizeTargetHref(currentHref) ? ' active' : ''
-      const href = calcRelativeHref(currentHref, item.href)
-      const sub = item.children?.length ? renderNavTree(item.children, currentHref) : ''
-      return `<li class="nav-item"><a href="${href}" class="nav-link${active}">${item.title}</a>${sub ? `<div class="nav-sub">${sub}</div>` : ''}</li>\n`
-    }).join('') + `</ul>\n`
-    group = []
-    return list
-  }
-  for (const item of items) {
-    if (item.type === 'section') {
-      html += `${flushGroup()}<div class="nav-section-title">${item.title}</div>\n`
-      if (item.items?.length) html += renderNavTree(item.items, currentHref)
-    } else group.push(item)
-  }
-  return html + flushGroup()
-}
+const { calcRelativeHref, renderNavTree } = require('./nav')
 
 const renderTocList = (toc) => toc?.length ? `<div class="toc-title">On this page</div>\n<ul class="toc-list">\n` + toc.map((i) => `<li class="toc-item level-${i.level}"><a href="#${i.id}" class="toc-link" onclick="closeAllDrawers()">${i.title}</a></li>`).join('') + `</ul>\n` : ''
 
 const resolveAssetHref = (currentHref, assetPath) => {
-  if (!assetPath || assetPath.startsWith('http') || assetPath.startsWith('<svg') || assetPath.startsWith('data:') || assetPath.startsWith('/')) {
-    return assetPath
-  }
+  if (!assetPath || ['http', '<svg', 'data:', '/'].some((p) => assetPath.startsWith(p))) return assetPath
   return calcRelativeHref(currentHref, assetPath.replace(/^\.\//, ''))
 }
 
@@ -116,4 +70,4 @@ const renderPageLayout = ({ title, siteTitle, navTree, toc, contentHtml, current
 </body></html>`
 }
 
-module.exports = { calcRelativeHref, renderPageLayout }
+module.exports = { renderPageLayout }
