@@ -20,6 +20,8 @@ const renderInline = (tokens, options = {}) => {
           return `<del>${renderInline(token.children, options)}</del>`
         case 'code':
           return `<code>${escapeHtml(token.value)}</code>`
+        case 'html':
+          return token.value
         case 'link':
           return `<a href="${escapeHtml(token.url)}">${renderInline(token.children, options)}</a>`
         case 'wikilink':

@@ -2,11 +2,13 @@ const { parseImage } = require('./image')
 const { parseWikilink } = require('./wikilink')
 const { parseCodeSpan } = require('./code-span')
 const { parseAutolink } = require('./autolink')
+const { parseInlineHtml } = require('./inline-html')
+const { parseEntity } = require('./entities')
 const { parseInlineTags } = require('./inline-tags')
 const { parseInlineLinks } = require('./inline-links')
 
 const ASCII_PUNC = /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/
-const TAG_MARKERS = ['[[', '**', '*', '~~', '`', '[', '![', '$', '\\', '<', '\n']
+const TAG_MARKERS = ['[[', '**', '*', '~~', '`', '[', '![', '$', '\\', '<', '\n', '&']
 
 const pushText = (tokens, val) => {
   if (!val) return
@@ -63,9 +65,17 @@ const parseInline = (text) => {
       continue
     }
 
+    const entity = parseEntity(text, index)
+    if (entity) {
+      pushText(tokens, entity.token.value)
+      index += entity.consumedLength
+      continue
+    }
+
     const tokenRes = parseWikilink(text, index) ||
       parseCodeSpan(text, index) ||
       parseAutolink(text, index) ||
+      parseInlineHtml(text, index) ||
       parseImage(text, index) ||
       parseInlineLinks(text, index, parseInline) ||
       parseInlineTags(text, index, parseInline)
