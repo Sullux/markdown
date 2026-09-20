@@ -1,3 +1,4 @@
+const { parseBreak } = require('./break')
 const { parseImage } = require('./image')
 const { parseWikilink } = require('./wikilink')
 const { parseCodeSpan } = require('./code-span')
@@ -42,26 +43,10 @@ const parseInline = (text, context = {}) => {
       continue
     }
 
-    if (text[index] === '\n') {
-      let isHard = false
-      if (tokens.length && tokens[tokens.length - 1].type === 'text') {
-        const last = tokens[tokens.length - 1]
-        const spaceMatch = last.value.match(/ {2,}$/)
-        if (spaceMatch) {
-          last.value = last.value.slice(0, -spaceMatch[0].length)
-          isHard = true
-        } else {
-          last.value = last.value.replace(/[ \t]+$/, '')
-        }
-      }
-      const lead = text.slice(index + 1).match(/^[ \t]*/)
-      const skip = lead ? lead[0].length : 0
-      const rest = text.slice(index + 1 + skip)
-      if (rest.length > 0) {
-        if (isHard) tokens.push({ type: 'br' })
-        else pushText(tokens, '\n')
-      }
-      index += 1 + skip
+    const brRes = parseBreak(text, index, tokens)
+    if (brRes) {
+      if (brRes.token) tokens.push(brRes.token)
+      index += brRes.consumedLength
       continue
     }
 
@@ -86,7 +71,15 @@ const parseInline = (text, context = {}) => {
       continue
     }
 
-    const candidateIndices = TAG_MARKERS.map((m) => text.indexOf(m, index)).filter((p) => p > index)
+    if (text[index] === '`') {
+      let runLen = 0
+      while (index + runLen < text.length && text[index + runLen] === '`') runLen++
+      pushText(tokens, text.slice(index, index + runLen))
+      index += runLen
+      continue
+    }
+
+    const candidateIndices = TAG_MARKERS.map((m) => text.indexOf(m, index + 1)).filter((p) => p !== -1)
     const nextTagIndex = candidateIndices.length > 0 ? Math.min(...candidateIndices) : text.length
     pushText(tokens, text.slice(index, nextTagIndex))
     index = nextTagIndex

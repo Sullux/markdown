@@ -27,7 +27,8 @@ const isBlockStart = (lines, idx, parseBlocks) => {
 
 const parseBlocks = (text, context = {}) => {
   if (!text || typeof text !== 'string') return []
-  const lines = text.split('\n')
+  const cleanText = text.endsWith('\n') ? text.slice(0, -1) : text
+  const lines = cleanText.split('\n')
   const blocks = []
   const defs = context.definitions || collectLinkDefs(lines)
   const ctx = { ...context, definitions: defs }

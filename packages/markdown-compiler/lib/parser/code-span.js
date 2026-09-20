@@ -1,5 +1,6 @@
 const parseCodeSpan = (text, index) => {
   if (text[index] !== '`') return null
+  if (index > 0 && text[index - 1] === '`') return null
   let openLen = 0
   while (index + openLen < text.length && text[index + openLen] === '`') openLen++
 
