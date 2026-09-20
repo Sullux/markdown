@@ -14,22 +14,31 @@ const indexOfUnescaped = (text, marker, fromIndex) => {
 const parseInlineTags = (text, index, parseInline) => {
   if (text.startsWith('~~', index)) {
     const close = indexOfUnescaped(text, '~~', index + 2)
-    if (close !== -1) {
-      return { token: { type: 'strikethrough', children: parseInline(text.slice(index + 2, close)) }, consumedLength: close + 2 - index }
+    if (close !== -1 && close > index + 2) {
+      const inner = text.slice(index + 2, close)
+      if (inner.trim().length > 0) {
+        return { token: { type: 'strikethrough', children: parseInline(inner) }, consumedLength: close + 2 - index }
+      }
     }
   }
 
   if (text.startsWith('**', index)) {
     const boldClose = indexOfUnescaped(text, '**', index + 2)
-    if (boldClose !== -1) {
-      return { token: { type: 'bold', children: parseInline(text.slice(index + 2, boldClose)) }, consumedLength: boldClose + 2 - index }
+    if (boldClose !== -1 && boldClose > index + 2) {
+      const inner = text.slice(index + 2, boldClose)
+      if (inner.trim().length > 0) {
+        return { token: { type: 'bold', children: parseInline(inner) }, consumedLength: boldClose + 2 - index }
+      }
     }
   }
 
   if (text.startsWith('*', index)) {
     const italicClose = indexOfUnescaped(text, '*', index + 1)
-    if (italicClose !== -1) {
-      return { token: { type: 'italic', children: parseInline(text.slice(index + 1, italicClose)) }, consumedLength: italicClose + 1 - index }
+    if (italicClose !== -1 && italicClose > index + 1) {
+      const inner = text.slice(index + 1, italicClose)
+      if (inner.trim().length > 0) {
+        return { token: { type: 'italic', children: parseInline(inner) }, consumedLength: italicClose + 1 - index }
+      }
     }
   }
 

@@ -67,7 +67,7 @@ const parseBlocks = (text, context = {}) => {
     const list = parseList(lines, i, (t) => parseBlocks(t, ctx))
     if (list) { blocks.push(list.block); i = list.nextIndex; continue }
 
-    const pLines = [line]
+    const pLines = [line.replace(/^ {0,3}/, '')]
     i++
     while (i < lines.length) {
       const setextLevel = parseSetextUnderline(lines[i])
@@ -79,10 +79,11 @@ const parseBlocks = (text, context = {}) => {
         break
       }
       if (isBlockStart(lines, i, parseBlocks)) break
-      pLines.push(lines[i])
+      pLines.push(lines[i].replace(/^ {0,3}/, ''))
       i++
     }
     if (pLines.length > 0) {
+      pLines[pLines.length - 1] = pLines[pLines.length - 1].replace(/[ \t]+$/, '')
       blocks.push({ type: 'paragraph', children: parseInline(pLines.join('\n'), ctx) })
     }
   }
