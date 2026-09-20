@@ -1,39 +1,50 @@
 const parseCodeFenceHeader = (line) => {
-  const info = line.trim().replace(/^(```|~~~)/, '').trim()
-  if (!info) return { language: null, languageMetadata: undefined }
+  const match = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*(.*)$/)
+  if (!match) return null
+  const fence = match[1]
+  const rawInfo = (match[2] || '').trim()
+  if (fence[0] === '`' && rawInfo.includes('`')) return null
 
-  const spaceIdx = info.indexOf(' ')
-  if (spaceIdx === -1) return { language: info, languageMetadata: undefined }
+  const indentMatch = line.match(/^ {0,3}/)
+  const indent = indentMatch ? indentMatch[0].length : 0
 
-  const language = info.slice(0, spaceIdx).trim()
-  const languageMetadata = info.slice(spaceIdx + 1).trim()
-  return { language: language || null, languageMetadata: languageMetadata || undefined }
+  if (!rawInfo) {
+    return { fenceLen: fence.length, fenceChar: fence[0], indent, language: null, languageMetadata: undefined }
+  }
+  const spaceIdx = rawInfo.indexOf(' ')
+  if (spaceIdx === -1) {
+    return { fenceLen: fence.length, fenceChar: fence[0], indent, language: rawInfo, languageMetadata: undefined }
+  }
+  const language = rawInfo.slice(0, spaceIdx).trim()
+  const languageMetadata = rawInfo.slice(spaceIdx + 1).trim()
+  return { fenceLen: fence.length, fenceChar: fence[0], indent, language: language || null, languageMetadata: languageMetadata || undefined }
 }
 
 const parseCodeBlock = (lines, startIndex) => {
-  const first = lines[startIndex].trim()
-  if (!first.startsWith('```') && !first.startsWith('~~~')) return null
-  const fenceChar = first[0]
-  const fenceLen = first.match(/^[`~]+/)[0].length
-  const fenceHeader = parseCodeFenceHeader(first)
+  const header = parseCodeFenceHeader(lines[startIndex])
+  if (!header) return null
 
+  const { fenceLen, fenceChar, indent, language, languageMetadata } = header
+  const closeRe = new RegExp(`^ {0,3}${fenceChar === '`' ? '`' : '~'}{${fenceLen},}[ \\t]*$`)
   const codeLines = []
   let i = startIndex + 1
+
   while (i < lines.length) {
     const line = lines[i]
-    if (line.trim().startsWith(fenceChar.repeat(fenceLen))) {
+    if (closeRe.test(line)) {
       i++
       break
     }
-    codeLines.push(line)
+    const stripped = line.startsWith(' '.repeat(indent)) ? line.slice(indent) : line.replace(new RegExp(`^ {0,${indent}}`), '')
+    codeLines.push(stripped)
     i++
   }
 
   return {
     block: {
       type: 'codeBlock',
-      language: fenceHeader.language,
-      languageMetadata: fenceHeader.languageMetadata,
+      language,
+      languageMetadata,
       value: codeLines.join('\n'),
     },
     nextIndex: i,
