@@ -5,7 +5,6 @@ const escapeHtml = (str) => {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 module.exports = { escapeHtml }

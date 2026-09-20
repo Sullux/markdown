@@ -10,7 +10,7 @@ const parseAutolink = (text, index) => {
     return {
       token: {
         type: 'link',
-        url: raw,
+        url: encodeURI(raw),
         children: [{ type: 'text', value: raw }],
       },
       consumedLength: uriMatch[0].length,
