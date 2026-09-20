@@ -53,7 +53,9 @@ const generateSite = (options = {}) => {
     const rawMd = fs.readFileSync(file.fullPath, 'utf8')
     const ast = parse(rawMd)
     const toc = extractToc(ast)
-    const { html: rawHtml, head: docHead } = markdownToHtml(ast)
+    const res = markdownToHtml(ast)
+    const rawHtml = typeof res === 'string' ? res : (res?.html || '')
+    const docHead = typeof res === 'object' && Array.isArray(res?.head) ? res.head : []
     const contentHtml = rewriteMarkdownLinks(rawHtml)
     const relHtmlPath = normalizeHtmlPath(file.relPath)
     const outHtmlPath = path.join(config.output, relHtmlPath)
