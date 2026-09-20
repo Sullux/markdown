@@ -1,17 +1,7 @@
-const { parseThematicBreak } = require('./thematic-break')
+const { parseMarker } = require('./list-marker')
+const { detabLine } = require('./tab')
 
-const BULLET_RE = /^( {0,3})([*+-])[ \t]+(.*)$/
-const ORDERED_RE = /^( {0,3})(\d{1,9})[.)][ \t]+(.*)$/
 const TASK_RE = /^\[([ xX])\]\s+(.*)$/
-
-const parseMarker = (line) => {
-  if (parseThematicBreak(line)) return null
-  const bMatch = line.match(BULLET_RE)
-  if (bMatch) return { indent: bMatch[1].length, isOrdered: false, marker: bMatch[2], content: bMatch[3] }
-  const oMatch = line.match(ORDERED_RE)
-  if (oMatch) return { indent: oMatch[1].length, isOrdered: true, start: parseInt(oMatch[2], 10), content: oMatch[3] }
-  return null
-}
 
 const parseList = (lines, startIndex, parseBlocks) => {
   const first = parseMarker(lines[startIndex])
@@ -31,6 +21,7 @@ const parseList = (lines, startIndex, parseBlocks) => {
     const taskMatch = marker.content.match(TASK_RE)
     const checked = taskMatch ? taskMatch[1].toLowerCase() === 'x' : undefined
     const firstLine = taskMatch ? taskMatch[2] : marker.content
+    const contentIndent = marker.contentIndent
     const rawContinuation = []
     i++
 
@@ -42,8 +33,8 @@ const parseList = (lines, startIndex, parseBlocks) => {
         while (next < lines.length && !lines[next].trim()) next++
         if (next >= lines.length) { i = next; break }
         const nextMarker = parseMarker(lines[next])
-        const nextIndent = lines[next].match(/^\s*/)[0].length
-        if (nextIndent >= baseIndent + 2) {
+        const nextIndent = detabLine(lines[next]).match(/^ */)[0].length
+        if (nextIndent >= contentIndent) {
           tight = false
           seenBlank = true
           rawContinuation.push(line)
@@ -58,8 +49,10 @@ const parseList = (lines, startIndex, parseBlocks) => {
         break
       }
 
-      const indent = line.match(/^\s*/)[0].length
-      if (indent >= baseIndent + 2) {
+      const detabbed = detabLine(line)
+      const indent = detabbed.match(/^ */)[0].length
+      const requiredIndent = seenBlank ? contentIndent : Math.min(contentIndent, baseIndent + 2)
+      if (indent >= requiredIndent) {
         if (seenBlank) tight = false
         rawContinuation.push(line)
         i++
@@ -69,10 +62,13 @@ const parseList = (lines, startIndex, parseBlocks) => {
     }
 
     const nonBlank = rawContinuation.filter((l) => l.trim())
-    const stripIndent = nonBlank.length > 0
-      ? Math.min(...nonBlank.map((l) => l.match(/^\s*/)[0].length))
-      : 0
-    const dedented = rawContinuation.map((l) => (l.length >= stripIndent ? l.slice(stripIndent) : l.trim()))
+    const minIndent = nonBlank.length > 0 ? Math.min(...nonBlank.map((l) => detabLine(l).match(/^ */)[0].length)) : 0
+    const stripIndent = Math.min(contentIndent, minIndent)
+    const dedented = rawContinuation.map((l) => {
+      if (!l.trim()) return ''
+      const dl = detabLine(l)
+      return dl.length >= stripIndent ? dl.slice(stripIndent) : dl.trim()
+    })
     const itemContent = [firstLine, ...dedented].join('\n')
     const children = parseBlocks(itemContent)
 
@@ -86,11 +82,10 @@ const parseList = (lines, startIndex, parseBlocks) => {
   const block = {
     type: isOrdered ? 'orderedList' : 'bulletList',
     tight,
-    ...(isOrdered ? { start: start || 1 } : {}),
     children: items,
+    ...(start !== undefined && start !== 1 ? { start } : {}),
   }
-
   return { block, nextIndex: i }
 }
 
-module.exports = { parseMarker, parseList }
+module.exports = { parseList }

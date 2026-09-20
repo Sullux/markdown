@@ -1,3 +1,5 @@
+const { detabLine } = require('./tab')
+
 const canInterruptLazy = (line) => {
   if (/^ {0,3}>/.test(line)) return true
   if (/^ {0,3}(#{1,6})(?:[ \t]|$)/.test(line)) return true
@@ -33,11 +35,12 @@ const parseQuote = (lines, startIndex, parseBlocks) => {
 
   while (i < lines.length) {
     const line = lines[i]
-    if (/^ {0,3}>/.test(line)) {
-      const content = line.replace(/^ {0,3}>[ \t]?/, '')
+    const detabbed = detabLine(line)
+    if (/^ {0,3}>/.test(detabbed)) {
+      const content = detabbed.replace(/^ {0,3}> ?/, '')
       innerLines.push(content)
       lastWasBlank = content.trim().length === 0
-      const isCode = content.startsWith('    ') || content.startsWith('\t') || /^ {0,3}(`{3,}|~{3,})/.test(content)
+      const isCode = content.startsWith('    ') || /^ {0,3}(`{3,}|~{3,})/.test(content)
       const isHeader = /^ {0,3}#{1,6}(?:[ \t]|$)/.test(content)
       inParagraph = !lastWasBlank && !isCode && !isHeader
       i++

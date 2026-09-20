@@ -64,7 +64,7 @@ test('markdownToHtml - Numbered lists with sub-bullets render nested <ul> inside
   ].join('\n')
 
   const { html } = markdownToHtml(md)
-  assert.ok(html.includes('<ol>\n<li>first item<ul>\n<li>sub 1</li>\n<li>sub 2</li>\n</ul>\n</li>\n<li>second item<ul>\n<li>sub 1</li>\n<li>sub 2</li>\n</ul>\n</li>\n</ol>'))
+  assert.ok(html.includes('<ol>\n<li>first item\n<ul>\n<li>sub 1</li>\n<li>sub 2</li>\n</ul>\n</li>\n<li>second item\n<ul>\n<li>sub 1</li>\n<li>sub 2</li>\n</ul>\n</li>\n</ol>'))
 })
 
 test('markdownToHtml - GFM Tables with column alignments', () => {

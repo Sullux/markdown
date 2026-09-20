@@ -1,5 +1,6 @@
 const { unescapeBackslashes } = require('./unescape')
 const { decodeEntities } = require('./entities')
+const { detabLine } = require('./tab')
 
 const parseCodeFenceHeader = (line) => {
   const match = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*(.*)$/)
@@ -53,29 +54,27 @@ const parseCodeBlock = (lines, startIndex) => {
 }
 
 const parseIndentedCodeBlock = (lines, startIndex) => {
-  const first = lines[startIndex]
-  if (!first || (!first.startsWith('    ') && !first.startsWith('\t'))) return null
+  const first = detabLine(lines[startIndex])
+  if (!first || !first.startsWith('    ')) return null
 
   const codeLines = []
   let i = startIndex
   while (i < lines.length) {
-    const line = lines[i]
-    if (!line.trim()) {
+    const rawLine = lines[i]
+    if (!rawLine.trim()) {
       let peek = i + 1
       while (peek < lines.length && !lines[peek].trim()) peek++
-      if (peek < lines.length && (lines[peek].startsWith('    ') || lines[peek].startsWith('\t'))) {
-        const stripped = line.startsWith('    ') ? line.slice(4) : (line.startsWith('\t') ? line.slice(1) : '')
-        codeLines.push(stripped)
+      if (peek < lines.length && detabLine(lines[peek]).startsWith('    ')) {
+        const detabbed = detabLine(rawLine)
+        codeLines.push(detabbed.startsWith('    ') ? detabbed.slice(4) : '')
         i++
         continue
       }
       break
     }
-    if (line.startsWith('    ')) {
-      codeLines.push(line.slice(4))
-      i++
-    } else if (line.startsWith('\t')) {
-      codeLines.push(line.slice(1))
+    const detabbed = detabLine(rawLine)
+    if (detabbed.startsWith('    ')) {
+      codeLines.push(detabbed.slice(4))
       i++
     } else {
       break

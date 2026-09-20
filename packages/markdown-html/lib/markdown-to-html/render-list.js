@@ -22,7 +22,8 @@ const renderListItem = (item, options, tight, renderBlock, hasInlineMath, KATEX_
     }
     const res = renderBlock(child, options)
     if (typeof res === 'object' && Array.isArray(res.head)) head = head.concat(res.head)
-    return typeof res === 'string' ? res : res?.html || ''
+    const rendered = typeof res === 'string' ? res : res?.html || ''
+    return (isInlineFirst && idx > 0 ? '\n' : '') + rendered
   }).join('')
 
   const prefix = isInlineFirst || !childrenHtml ? '' : '\n'

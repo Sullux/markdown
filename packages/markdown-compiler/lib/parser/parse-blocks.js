@@ -20,7 +20,8 @@ const isBlockStart = (lines, idx, parseBlocks) => {
   if (parseHtml(lines, idx, true)) return true
   if (parseTable(lines, idx)) return true
   if (parseQuote(lines, idx, parseBlocks)) return true
-  if (parseList(lines, idx, parseBlocks)) return true
+  const listRes = parseList(lines, idx, parseBlocks)
+  if (listRes && listRes.block.children[0]?.children?.length > 0) return true
   return false
 }
 
