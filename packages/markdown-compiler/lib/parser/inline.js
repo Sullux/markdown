@@ -58,7 +58,7 @@ const parseInline = (text, context = {}) => {
       continue
     }
 
-    const tokenRes = parseWikilink(text, index) ||
+    const tokenRes = (context?.wikilinks !== false ? parseWikilink(text, index) : null) ||
       parseCodeSpan(text, index) ||
       parseAutolink(text, index) ||
       parseInlineHtml(text, index) ||

@@ -2,7 +2,7 @@ const { parseFrontmatter } = require('./frontmatter')
 const { parseInline } = require('./inline')
 const { parseBlocks } = require('./parse-blocks')
 
-const parse = (text) => {
+const parse = (text, options = {}) => {
   if (text.startsWith('---\n')) {
     const endIdx = text.indexOf('\n---\n', 4)
     if (endIdx !== -1) {
@@ -11,13 +11,13 @@ const parse = (text) => {
       const frontmatter = hasInvalidLines ? {} : parseFrontmatter(yamlContent)
       if (!hasInvalidLines && Object.keys(frontmatter).length > 0) {
         const bodyText = text.slice(endIdx + 5)
-        const blocks = parseBlocks(bodyText)
+        const blocks = parseBlocks(bodyText, options)
         return { frontmatter, blocks }
       }
     }
   }
 
-  return { frontmatter: {}, blocks: parseBlocks(text) }
+  return { frontmatter: {}, blocks: parseBlocks(text, options) }
 }
 
 module.exports = { parse, parseBlocks, parseInline, parseFrontmatter }

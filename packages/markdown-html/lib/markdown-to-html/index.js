@@ -5,7 +5,7 @@ const markdownToHtml = (markdown, options = {}) => {
   if (!markdown) {
     return { html: '', head: [], toString() { return '' } }
   }
-  const ast = typeof markdown === 'string' ? parse(markdown) : markdown
+  const ast = typeof markdown === 'string' ? parse(markdown, options) : markdown
   const ctx = { ...options, usedSlugs: new Set() }
   const result = renderBlocks(ast.blocks, ctx)
   const uniqueHead = [...new Set(result.head)]

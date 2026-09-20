@@ -39,7 +39,7 @@ for (const item of filtered) {
   let actual = ''
   let error = null
   try {
-    const res = markdownToHtml(item.markdown, { headingIds: false })
+    const res = markdownToHtml(item.markdown, { headingIds: false, wikilinks: false })
     actual = typeof res === 'string' ? res : res.html || ''
   } catch (err) {
     error = err

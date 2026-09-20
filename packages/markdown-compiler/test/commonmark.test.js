@@ -9,11 +9,11 @@ test('CommonMark 0.31.2 Conformance Suite - baseline score regression check', ()
   let passed = 0
   for (const s of specs) {
     try {
-      const res = markdownToHtml(s.markdown, { headingIds: false })
+      const res = markdownToHtml(s.markdown, { headingIds: false, wikilinks: false })
       const html = typeof res === 'string' ? res : res.html || ''
       if (html.trim() === s.html.trim()) passed++
     } catch (e) {}
   }
-  const minRequired = 500
+  const minRequired = 503
   assert.ok(passed >= minRequired, `Expected at least ${minRequired} passed tests, but got ${passed}`)
 })
