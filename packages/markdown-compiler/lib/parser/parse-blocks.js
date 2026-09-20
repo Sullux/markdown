@@ -1,91 +1,72 @@
-const { parseCodeFenceHeader } = require('./code')
-const { parseSpecialBlocks, parseBlockHeadersAndLists } = require('./block-matchers')
-const { parseHtmlBlock } = require('./html')
-const { parseMathBlock } = require('./math')
-const { mapBlocks } = require('./map-blocks')
+const { parseHeader } = require('./header')
+const { parseThematicBreak } = require('./thematic-break')
+const { parseCodeBlock } = require('./code')
+const { parseHtml } = require('./html')
+const { parseMath } = require('./math')
+const { parseQuote } = require('./quote')
+const { parseTable } = require('./table')
+const { parseList } = require('./list')
+const { parseInline } = require('./inline')
 
-const blockMatchers = [parseSpecialBlocks, parseHtmlBlock, parseMathBlock]
+const isBlockStart = (lines, idx, parseBlocks) => {
+  const line = lines[idx]
+  if (!line || !line.trim()) return true
+  if (parseThematicBreak(line)) return true
+  if (parseHeader(line)) return true
+  const trimmed = line.trim()
+  if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) return true
+  if (trimmed.startsWith('$$')) return true
+  if (trimmed.startsWith('<') && line.match(/^<([a-zA-Z][a-zA-Z0-9]*|!--)(?:\s|>|$)/)) return true
+  if (parseTable(lines, idx)) return true
+  if (parseQuote(lines, idx, parseBlocks)) return true
+  if (parseList(lines, idx, parseBlocks)) return true
+  return false
+}
 
 const parseBlocks = (text) => {
+  if (!text || typeof text !== 'string') return []
   const lines = text.split('\n')
   const blocks = []
-  let currentBlock = null
+  let i = 0
 
-  for (let i = 0; i < lines.length; i++) {
+  while (i < lines.length) {
     const line = lines[i]
+    if (!line.trim()) { i++; continue }
 
-    const special = blockMatchers.reduce((acc, fn) => acc.handled ? acc : fn(line, currentBlock, blocks), { handled: false })
-    if (special.handled) {
-      if (special.clearCurrent) currentBlock = null
-      else if (special.newCurrent) currentBlock = special.newCurrent
-      continue
-    }
+    const hr = parseThematicBreak(line)
+    if (hr) { blocks.push(hr); i++; continue }
 
-    if (currentBlock && currentBlock.type === 'codeBlock') {
-      if (line.trim().startsWith('```') || line.trim().startsWith('~~~')) {
-        blocks.push(currentBlock)
-        currentBlock = null
-      } else {
-        currentBlock.value += (currentBlock.value ? '\n' : '') + line
-      }
-      continue
-    }
+    const header = parseHeader(line)
+    if (header) { blocks.push(header); i++; continue }
 
-    if (line.trim().startsWith('```') || line.trim().startsWith('~~~')) {
-      if (currentBlock) blocks.push(currentBlock)
-      const fence = parseCodeFenceHeader(line)
-      currentBlock = { type: 'codeBlock', language: fence.language, languageMetadata: fence.languageMetadata, value: '' }
-      continue
-    }
+    const code = parseCodeBlock(lines, i)
+    if (code) { blocks.push(code.block); i = code.nextIndex; continue }
 
-    const trimmed = line.trim()
-    if (!trimmed) {
-      if (currentBlock) {
-        blocks.push(currentBlock)
-        currentBlock = null
-      }
-      continue
-    }
+    const math = parseMath(lines, i)
+    if (math) { blocks.push(math.block); i = math.nextIndex; continue }
 
-    if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
-      if (currentBlock) {
-        blocks.push(currentBlock)
-        currentBlock = null
-      }
-      blocks.push({ type: 'hr' })
-      continue
-    }
+    const html = parseHtml(lines, i)
+    if (html) { blocks.push(html.block); i = html.nextIndex; continue }
 
-    const isTableDivider = /^\s*\|?\s*(:?\-+:?\s*\|?\s*)+$/.test(line) && line.includes('|')
-    if (isTableDivider && currentBlock && currentBlock.type === 'paragraph') {
-      currentBlock = { type: 'table', headerLine: currentBlock.rawText, dividerLine: line, rows: [] }
-      continue
-    }
+    const table = parseTable(lines, i)
+    if (table) { blocks.push(table.block); i = table.nextIndex; continue }
 
-    const matched = parseBlockHeadersAndLists(line, currentBlock, blocks)
-    if (matched.handled) {
-      if (matched.resetCurrent) {
-        blocks.push(matched.block)
-        currentBlock = null
-      } else {
-        currentBlock = matched.block
-      }
-      continue
-    }
+    const quote = parseQuote(lines, i, parseBlocks)
+    if (quote) { blocks.push(quote.block); i = quote.nextIndex; continue }
 
-    if (!currentBlock) {
-      currentBlock = { type: 'paragraph', rawText: line }
-    } else if (currentBlock.type === 'paragraph') {
-      currentBlock.rawText += '\n' + line
-    } else {
-      blocks.push(currentBlock)
-      currentBlock = { type: 'paragraph', rawText: line }
+    const list = parseList(lines, i, parseBlocks)
+    if (list) { blocks.push(list.block); i = list.nextIndex; continue }
+
+    const pLines = [line]
+    i++
+    while (i < lines.length && !isBlockStart(lines, i, parseBlocks)) {
+      pLines.push(lines[i])
+      i++
     }
+    blocks.push({ type: 'paragraph', children: parseInline(pLines.join('\n')) })
   }
 
-  if (currentBlock) blocks.push(currentBlock)
-
-  return mapBlocks(blocks, parseBlocks)
+  return blocks
 }
 
 module.exports = { parseBlocks }

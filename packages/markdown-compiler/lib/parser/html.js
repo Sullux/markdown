@@ -1,25 +1,26 @@
-const parseHtmlBlock = (line, currentBlock, blocks) => {
-  if (currentBlock && currentBlock.type === 'html') {
-    currentBlock.value += '\n' + line
-    if (line.includes(`</${currentBlock.tag}>`) || (currentBlock.tag === '!--' && line.includes('-->'))) {
-      blocks.push(currentBlock)
-      return { handled: true, clearCurrent: true }
+const parseHtml = (lines, startIndex) => {
+  const first = lines[startIndex]
+  const match = first.match(/^<([a-zA-Z][a-zA-Z0-9]*|!--)(?:\s|>|$)/)
+  if (!match) return null
+
+  const tag = match[1].toLowerCase()
+  const isClosed = tag === '!--' ? first.includes('-->') : (first.trim().endsWith('/>') || first.includes(`</${tag}>`))
+  const htmlLines = [first]
+  let i = startIndex + 1
+
+  if (!isClosed) {
+    while (i < lines.length) {
+      const line = lines[i]
+      htmlLines.push(line)
+      i++
+      if (line.includes(`</${tag}>`) || (tag === '!--' && line.includes('-->'))) break
     }
-    return { handled: true }
   }
 
-  const htmlMatch = !currentBlock ? line.match(/^<([a-zA-Z][a-zA-Z0-9]*|!--)(?:\s|>|$)/) : null
-  if (htmlMatch) {
-    const tag = htmlMatch[1].toLowerCase()
-    const isClosed = tag === '!--' ? line.includes('-->') : (line.trim().endsWith('/>') || line.includes(`</${tag}>`))
-    if (isClosed) {
-      blocks.push({ type: 'html', tag, value: line })
-      return { handled: true }
-    }
-    return { handled: true, newCurrent: { type: 'html', tag, value: line } }
+  return {
+    block: { type: 'html', tag, value: htmlLines.join('\n') },
+    nextIndex: i,
   }
-
-  return { handled: false }
 }
 
-module.exports = { parseHtmlBlock }
+module.exports = { parseHtml }

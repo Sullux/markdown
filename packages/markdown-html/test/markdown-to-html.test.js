@@ -48,6 +48,20 @@ test('markdownToHtml - Task lists and checkboxes', () => {
   assert.match(html, /<input type="checkbox" checked disabled \/> Task 2/)
 })
 
+test('markdownToHtml - Numbered lists with sub-bullets render nested <ul> inside <li> without re-numbering', () => {
+  const md = [
+    '1. first item',
+    '  - sub 1',
+    '  - sub 2',
+    '2. second item',
+    '  - sub 1',
+    '  - sub 2',
+  ].join('\n')
+
+  const html = markdownToHtml(md)
+  assert.ok(html.includes('<ol>\n<li>first item<ul>\n<li>sub 1</li>\n<li>sub 2</li>\n</ul>\n</li>\n<li>second item<ul>\n<li>sub 1</li>\n<li>sub 2</li>\n</ul>\n</li>\n</ol>'))
+})
+
 test('markdownToHtml - GFM Tables with column alignments', () => {
   const md = '| Name | Age |\n| :--- | ---: |\n| Charles | 50 |'
   const html = markdownToHtml(md)

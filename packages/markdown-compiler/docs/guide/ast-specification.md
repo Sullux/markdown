@@ -15,7 +15,7 @@ interface Document {
 
 ## Block Nodes
 
-Block nodes define structural regions of the document.
+Block nodes define structural regions of the document. Block structure strictly adheres to the [CommonMark Specification (v0.31.2)](https://spec.commonmark.org/0.31.2/) for container blocks and nesting.
 
 ### `header`
 Represents section headings (`#` through `######`).
@@ -37,20 +37,32 @@ Represents a block of running prose.
 ```
 
 ### `bulletList` & `orderedList`
-Represents lists. Each element in `items` is an array of inline nodes with indentation and sequence metadata.
+Represents container lists adhering to CommonMark §5.3. Contains `listItem` container nodes in `children`.
 ```javascript
 {
   type: 'orderedList', // or 'bulletList'
-  items: [
-    [
-      { type: 'text', value: 'First step' },
-      // items array properties:
-      // indent: 0,
-      // depth: 0,
-      // listType: 'ordered',
-      // order: 1
-    ]
+  start: 1,            // starting number for ordered lists (default 1)
+  tight: true,         // true for tight lists, false for loose lists
+  children: [
+    {
+      type: 'listItem',
+      checked: false,  // boolean for task list items, undefined for normal items
+      children: [
+        { type: 'paragraph', children: [ { type: 'text', value: 'First step' } ] },
+        // optional nested sub-lists or continuation blocks
+      ]
+    }
   ]
+}
+```
+
+### `listItem`
+A container block representing an individual list entry (§5.2). It contains an array of block nodes in `children` (such as paragraphs, sub-lists, or code blocks) and an optional `checked` property for GFM task lists.
+```javascript
+{
+  type: 'listItem',
+  checked: true, // optional boolean
+  children: [ /* BlockNode[] */ ]
 }
 ```
 

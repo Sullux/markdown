@@ -1,6 +1,6 @@
 {
   "name": "@sullux/markdown-docs",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "A zero-dependency, local-first static documentation site generator compiling GitBook-style Markdown docs.",
   "main": "./index.js",
   "bin": {
@@ -38,7 +38,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "@sullux/markdown-compiler": "^1.0.2",
-    "@sullux/markdown-html": "^1.0.2"
+    "@sullux/markdown-compiler": "^2.0.0",
+    "@sullux/markdown-html": "^2.0.0"
   }
 }

@@ -12,8 +12,22 @@ const paragraph = (children) => ({ type: 'paragraph', children })
 const header = (level, children) => ({ type: 'header', level, children })
 const blockquote = (children) => ({ type: 'blockquote', children })
 const callout = (style, title, children) => ({ type: 'callout', style, title, children })
-const bulletList = (items) => ({ type: 'bulletList', items })
-const orderedList = (items) => ({ type: 'orderedList', items })
+const listItem = (children, checked) => ({
+  type: 'listItem',
+  children: Array.isArray(children) ? children : [children],
+  ...(checked !== undefined ? { checked } : {}),
+})
+const bulletList = (children, tight = true) => ({
+  type: 'bulletList',
+  tight,
+  children: (children || []).map((c) => (c?.type === 'listItem' ? c : listItem(Array.isArray(c) ? [paragraph(c)] : [c]))),
+})
+const orderedList = (children, start = 1, tight = true) => ({
+  type: 'orderedList',
+  start,
+  tight,
+  children: (children || []).map((c) => (c?.type === 'listItem' ? c : listItem(Array.isArray(c) ? [paragraph(c)] : [c]))),
+})
 const table = (alignments, rows) => ({ type: 'table', alignments, rows })
 const hr = () => ({ type: 'hr' })
 const br = () => ({ type: 'br' })
@@ -36,6 +50,7 @@ module.exports = {
   header,
   blockquote,
   callout,
+  listItem,
   bulletList,
   orderedList,
   table,

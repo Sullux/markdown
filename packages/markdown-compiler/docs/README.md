@@ -14,6 +14,7 @@ Designed around strict local-first, low-overhead principles, `@sullux/markdown-c
 * **Separation of Document Concerns:** Pure AST focus—no presentation, CSS, or styling concerns.
 * **Symmetric Round-Trip Parity:** Parses Markdown to an AST, and compiles an AST back to Markdown with structural fidelity.
 * **Declarative Node Builder DSL:** Construct valid AST documents programmatically using pure `Node.*` factories without manual JSON wrangling.
+* **Standards-Conformant:** Conforms to the [CommonMark Specification (v0.31.2)](https://spec.commonmark.org/0.31.2/) for block container hierarchy and list nesting.
 * **Rich Syntax Support:** Comprehensive coverage of GitHub Flavored Markdown (GFM), GitBook hint blocks, multi-syntax image dimensions, callout boxes, and task lists.
 
 ## Architecture
@@ -26,8 +27,9 @@ Document
 └── blocks: Array of Block Nodes
     ├── header (level, children)
     ├── paragraph (children)
-    ├── bulletList (items: Array of Inline Nodes, with indent, depth, listType)
-    ├── orderedList (items: Array of Inline Nodes, with indent, depth, listType, order)
+    ├── bulletList (tight, children: Array of listItem nodes)
+    ├── orderedList (start, tight, children: Array of listItem nodes)
+    │   └── listItem (checked, children: Array of Block Nodes)
     ├── codeBlock (language, languageMetadata, value)
     ├── mathBlock (value)
     ├── blockquote (children)

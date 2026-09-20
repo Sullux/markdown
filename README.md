@@ -18,7 +18,7 @@ Designed for low cognitive load and strict auditability, the Sullux Markdown Sui
 
 Designed around strict local-first, low-overhead principles, `@sullux/markdown-compiler` provides a standard, timeless intermediate document representation between rich sender formats (such as HTML or platform-specific messaging APIs) and consumer presentation surfaces (such as web dashboards, static documentation sites, or terminal interfaces).
 
-It features symmetric round-trip conversion between Markdown text and a clean, two-level AST, a declarative `Node.*` builder DSL for programmatic document construction, and comprehensive support for GitHub Flavored Markdown (GFM) tables, task lists, callout boxes, YAML frontmatter, code block metadata, and multi-syntax image dimensions.
+It features symmetric round-trip conversion between Markdown text and a clean, two-level AST conformant to the [CommonMark Specification (v0.31.2)](https://spec.commonmark.org/0.31.2/), a declarative `Node.*` builder DSL for programmatic document construction, and comprehensive support for GitHub Flavored Markdown (GFM) tables, task lists, callout boxes, YAML frontmatter, code block metadata, and multi-syntax image dimensions.
 
 #### Quick Start
 

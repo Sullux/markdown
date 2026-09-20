@@ -3,11 +3,9 @@ const { parseInline } = require('./inline')
 const parseAlignments = (dividerLine) => {
   const cells = dividerLine.split('|').map((s) => s.trim()).filter((s, idx, arr) => idx > 0 && idx < arr.length - 1)
   return cells.map((cell) => {
-    const left = cell.startsWith(':')
-    const right = cell.endsWith(':')
-    if (left && right) return 'center'
-    if (right) return 'right'
-    if (left) return 'left'
+    if (cell.startsWith(':') && cell.endsWith(':')) return 'center'
+    if (cell.endsWith(':')) return 'right'
+    if (cell.startsWith(':')) return 'left'
     return 'default'
   })
 }
@@ -19,15 +17,29 @@ const parseTableRow = (rowLine) => {
   return cells.map((cell) => parseInline(cell))
 }
 
-const parseTableBlock = (rawHeader, dividerLine, rawRows) => {
-  const alignments = parseAlignments(dividerLine)
-  const headerCells = parseTableRow(rawHeader)
-  const bodyRows = rawRows.map((r) => parseTableRow(r))
-  return {
-    type: 'table',
-    alignments,
-    rows: [headerCells, ...bodyRows],
+const parseTableBlock = (rawHeader, dividerLine, rawRows) => ({
+  type: 'table',
+  alignments: parseAlignments(dividerLine),
+  rows: [parseTableRow(rawHeader), ...rawRows.map((r) => parseTableRow(r))],
+})
+
+const isTableDivider = (line) => Boolean(line && /^\s*\|?\s*(:?\-+:?\s*\|?\s*)+$/.test(line) && line.includes('|'))
+
+const parseTable = (lines, startIndex) => {
+  const header = lines[startIndex]
+  const divider = lines[startIndex + 1]
+  if (!header || !header.includes('|') || !isTableDivider(divider)) return null
+
+  const rawRows = []
+  let i = startIndex + 2
+  while (i < lines.length) {
+    const line = lines[i]
+    if (!line.trim() || !line.includes('|')) break
+    rawRows.push(line)
+    i++
   }
+
+  return { block: parseTableBlock(header, divider, rawRows), nextIndex: i }
 }
 
-module.exports = { parseTableBlock }
+module.exports = { parseTable, parseTableBlock }

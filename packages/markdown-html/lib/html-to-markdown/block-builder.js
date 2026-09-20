@@ -60,17 +60,19 @@ const processBlockNode = (node, style, blocks, currentInline, traverse, toAst) =
 
   if (tagName === 'ul' || tagName === 'ol') {
     flushInline()
-    const items = []
+    const children = []
     for (const child of node.children) {
       if (child.tagName === 'li') {
         const itemInline = []
         for (const liChild of child.children) traverse(liChild, style, itemInline)
-        if (itemInline.length > 0) items.push(itemInline)
+        if (itemInline.length > 0) {
+          children.push({ type: 'listItem', children: [{ type: 'paragraph', children: itemInline }] })
+        }
       } else {
         traverse(child, style, currentInline)
       }
     }
-    if (items.length > 0) blocks.push({ type: tagName === 'ul' ? 'bulletList' : 'orderedList', items })
+    if (children.length > 0) blocks.push({ type: tagName === 'ul' ? 'bulletList' : 'orderedList', tight: true, children })
     return true
   }
 

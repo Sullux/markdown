@@ -2,6 +2,7 @@ const { escapeHtml } = require('./escape')
 const { slugify } = require('./slugify')
 const { renderInline } = require('./render-inline')
 const { highlightCode } = require('./highlight')
+const { renderList } = require('./render-list')
 
 const renderBlock = (node, options = {}) => {
   if (!node) return ''
@@ -35,13 +36,9 @@ const renderBlock = (node, options = {}) => {
       const innerHtml = node.children ? node.children.map((child) => renderBlock(child, options)).join('') : ''
       return `<div class="callout callout-${style}">\n<div class="callout-title">${title}</div>\n${innerHtml}</div>\n`
     }
-    case 'bulletList': {
-      const itemsHtml = node.items ? node.items.map((item) => `<li>${renderInline(item, options)}</li>\n`).join('') : ''
-      return `<ul>\n${itemsHtml}</ul>\n`
-    }
+    case 'bulletList':
     case 'orderedList': {
-      const itemsHtml = node.items ? node.items.map((item) => `<li>${renderInline(item, options)}</li>\n`).join('') : ''
-      return `<ol>\n${itemsHtml}</ol>\n`
+      return renderList(node, options, renderBlock)
     }
     case 'table': {
       const alignments = node.alignments || []

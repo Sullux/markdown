@@ -12,8 +12,9 @@ const { Node } = require('@sullux/markdown-compiler')
 
 * **`Node.header(level, children)`**: Creates a header node (`level`: 1–6).
 * **`Node.paragraph(children)`**: Creates a paragraph block node.
-* **`Node.bulletList(items)`**: Creates an unordered bullet list block node.
-* **`Node.orderedList(items)`**: Creates a numbered ordered list block node.
+* **`Node.listItem(children, checked)`**: Creates a list item container node (`checked`: optional boolean).
+* **`Node.bulletList(children, tight)`**: Creates an unordered bullet list container node.
+* **`Node.orderedList(children, start, tight)`**: Creates a numbered ordered list container node (`start`: default 1).
 * **`Node.codeBlock(language, value)`**: Creates a fenced code block node.
 * **`Node.blockquote(children)`**: Creates a blockquote node.
 * **`Node.callout(style, title, children)`**: Creates a callout box node (e.g. `'note'`, `'warning'`).

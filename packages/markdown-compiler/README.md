@@ -46,6 +46,16 @@ console.log(markdown)
 
 For complete guides, interactive examples, and full API specifications, see the [official documentation](https://sullux.com/projects/markdown/markdown-compiler/).
 
+## Standards & Specification
+
+`@sullux/markdown-compiler` conforms to the [CommonMark Specification (v0.31.2)](https://spec.commonmark.org/0.31.2/) for block structure and container hierarchy, while supporting popular production extensions:
+* **GFM Extensions:** Pipe tables, task list items (`- [ ]`, `- [x]`), and strikethrough (`~~`).
+* **Document Metadata:** YAML frontmatter parsed into a top-level `frontmatter` object.
+* **Mathematical Notation:** Inline `$formula$` and block `$$display$$` math elements.
+* **Multi-Syntax Image Dimensions:** Obsidian (`|WxH`), Pandoc (`{:width=}`), GitHub, and VS Code dimensions.
+* **Callout Banners:** GitHub alerts (`> [!NOTE]`) and GitBook hint blocks (`{% hint %}`).
+* **Wikilinks:** Internal Obsidian-style page links (`[[Target|Title]]`).
+
 ## Contributing & License
 
 Please see the [Monorepo README](../../README.md) for contribution guidelines, testing instructions, and license details.

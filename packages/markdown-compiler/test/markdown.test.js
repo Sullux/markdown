@@ -161,15 +161,27 @@ test('nested bullet lists preserve indentation and depth', () => {
 
   const ast = parse(md)
   assert.strictEqual(ast.blocks[0].type, 'bulletList')
-  assert.strictEqual(ast.blocks[0].items.length, 4)
-  assert.strictEqual(ast.blocks[0].items[0].indent, 0)
-  assert.strictEqual(ast.blocks[0].items[0].depth, 0)
-  assert.strictEqual(ast.blocks[0].items[1].indent, 2)
-  assert.strictEqual(ast.blocks[0].items[1].depth, 1)
-  assert.strictEqual(ast.blocks[0].items[2].indent, 4)
-  assert.strictEqual(ast.blocks[0].items[2].depth, 2)
-  assert.strictEqual(ast.blocks[0].items[3].indent, 0)
-  assert.strictEqual(ast.blocks[0].items[3].depth, 0)
+  assert.strictEqual(ast.blocks[0].children.length, 2)
+
+  // Item 1 contains paragraph and nested bulletList
+  const item1 = ast.blocks[0].children[0]
+  assert.strictEqual(item1.type, 'listItem')
+  assert.strictEqual(item1.children[0].type, 'paragraph')
+  assert.strictEqual(item1.children[0].children[0].value, 'Item 1')
+
+  const subList1 = item1.children[1]
+  assert.strictEqual(subList1.type, 'bulletList')
+  assert.strictEqual(subList1.children[0].type, 'listItem')
+  assert.strictEqual(subList1.children[0].children[0].children[0].value, 'Sub-item 1.1')
+
+  const subSubList = subList1.children[0].children[1]
+  assert.strictEqual(subSubList.type, 'bulletList')
+  assert.strictEqual(subSubList.children[0].children[0].children[0].value, 'Sub-item 1.1.1')
+
+  // Item 2
+  const item2 = ast.blocks[0].children[1]
+  assert.strictEqual(item2.type, 'listItem')
+  assert.strictEqual(item2.children[0].children[0].value, 'Item 2')
 })
 
 test('ordered list with nested bullet sub-list preserves single list block and continuation numbering', () => {
@@ -185,38 +197,51 @@ test('ordered list with nested bullet sub-list preserves single list block and c
   const ast = parse(md)
   assert.strictEqual(ast.blocks.length, 1)
   assert.strictEqual(ast.blocks[0].type, 'orderedList')
-  assert.strictEqual(ast.blocks[0].items.length, 6)
+  assert.strictEqual(ast.blocks[0].children.length, 4)
 
-  const items = ast.blocks[0].items
-  assert.strictEqual(items[0].order, 1)
-  assert.strictEqual(items[0].depth, 0)
-  assert.strictEqual(items[0].listType, 'ordered')
+  const items = ast.blocks[0].children
+  assert.strictEqual(items[0].children[0].children[0].value, 'Streaming & Chunking')
+  assert.strictEqual(items[1].children[0].children[0].value, 'Pre-processing')
 
-  assert.strictEqual(items[1].order, 2)
-  assert.strictEqual(items[1].depth, 0)
-  assert.strictEqual(items[1].listType, 'ordered')
+  // Item 3 has paragraph and nested bullet list
+  assert.strictEqual(items[2].children[0].children[0].value, 'Summarization via MapReduce')
+  const nestedList = items[2].children[1]
+  assert.strictEqual(nestedList.type, 'bulletList')
+  assert.strictEqual(nestedList.children.length, 2)
+  assert.strictEqual(nestedList.children[0].children[0].children[0].value, 'Map')
+  assert.strictEqual(nestedList.children[1].children[0].children[0].value, 'Reduce')
 
-  assert.strictEqual(items[2].order, 3)
-  assert.strictEqual(items[2].depth, 0)
-  assert.strictEqual(items[2].listType, 'ordered')
-
-  assert.strictEqual(items[3].depth, 1)
-  assert.strictEqual(items[3].listType, 'bullet')
-  assert.strictEqual(items[3].marker, '*')
-
-  assert.strictEqual(items[4].depth, 1)
-  assert.strictEqual(items[4].listType, 'bullet')
-  assert.strictEqual(items[4].marker, '*')
-
-  assert.strictEqual(items[5].order, 4)
-  assert.strictEqual(items[5].depth, 0)
-  assert.strictEqual(items[5].listType, 'ordered')
+  assert.strictEqual(items[3].children[0].children[0].value, 'LLM Integration')
 
   const stringified = stringify(ast)
   assert.ok(stringified.includes('1. Streaming & Chunking'))
-  assert.ok(stringified.includes('    * Map'))
-  assert.ok(stringified.includes('    * Reduce'))
+  assert.ok(stringified.includes('* Map'))
+  assert.ok(stringified.includes('* Reduce'))
   assert.ok(stringified.includes('4. LLM Integration'))
+})
+
+test('ordered list with nested bullet sub-lists separates items and maintains nested hierarchy', () => {
+  const md = [
+    '1. first item',
+    '  - sub 1',
+    '  - sub 2',
+    '2. second item',
+    '  - sub 1',
+    '  - sub 2',
+  ].join('\n')
+
+  const ast = parse(md)
+  assert.strictEqual(ast.blocks.length, 1)
+  assert.strictEqual(ast.blocks[0].type, 'orderedList')
+  assert.strictEqual(ast.blocks[0].children.length, 2)
+
+  assert.strictEqual(ast.blocks[0].children[0].children[0].children[0].value, 'first item')
+  assert.strictEqual(ast.blocks[0].children[0].children[1].type, 'bulletList')
+  assert.strictEqual(ast.blocks[0].children[0].children[1].children.length, 2)
+
+  assert.strictEqual(ast.blocks[0].children[1].children[0].children[0].value, 'second item')
+  assert.strictEqual(ast.blocks[0].children[1].children[1].type, 'bulletList')
+  assert.strictEqual(ast.blocks[0].children[1].children[1].children.length, 2)
 })
 
 test('image dimension parsing supports Obsidian, Pandoc/Gitlab, GitHub, and VS Code syntaxes', () => {

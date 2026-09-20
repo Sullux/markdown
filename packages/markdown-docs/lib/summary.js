@@ -15,26 +15,43 @@ const parseSummaryMd = (content) => {
   const nav = []
   let currentSection = null
 
+  const extractItems = (listNode) => {
+    const items = []
+    const listChildren = listNode.children || listNode.items || []
+    for (const item of listChildren) {
+      let linkInfo = null
+      const subLists = []
+      const itemBlocks = item.children || (Array.isArray(item) ? [{ type: 'paragraph', children: item }] : [])
+
+      for (const child of itemBlocks) {
+        if (child.type === 'paragraph') {
+          for (const node of child.children || []) {
+            if (node.type === 'link') {
+              const title = node.children ? node.children.map((c) => c.value || '').join('') : ''
+              linkInfo = { title, href: normalizeHref(node.url) }
+            }
+          }
+        } else if (child.type === 'bulletList' || child.type === 'orderedList') {
+          subLists.push(...extractItems(child))
+        }
+      }
+
+      if (linkInfo) {
+        items.push({ ...linkInfo, children: subLists })
+      }
+    }
+    return items
+  }
+
   for (const block of ast.blocks) {
     if (block.type === 'header' && block.level > 1) {
       const sectionTitle = block.children ? block.children.map((c) => c.value || '').join('') : ''
       currentSection = { type: 'section', title: sectionTitle, items: [] }
       nav.push(currentSection)
     } else if (block.type === 'bulletList' || block.type === 'orderedList') {
-      const listItems = []
-      for (const itemNodes of block.items || []) {
-        for (const node of itemNodes) {
-          if (node.type === 'link') {
-            const title = node.children ? node.children.map((c) => c.value || '').join('') : ''
-            listItems.push({ title, href: normalizeHref(node.url), children: [] })
-          }
-        }
-      }
-      if (currentSection) {
-        currentSection.items.push(...listItems)
-      } else {
-        nav.push(...listItems)
-      }
+      const listItems = extractItems(block)
+      if (currentSection) currentSection.items.push(...listItems)
+      else nav.push(...listItems)
     }
   }
 
