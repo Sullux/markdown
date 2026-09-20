@@ -14,6 +14,6 @@ test('CommonMark 0.31.2 Conformance Suite - baseline score regression check', ()
       if (html.trim() === s.html.trim()) passed++
     } catch (e) {}
   }
-  const minRequired = 447
+  const minRequired = 465
   assert.ok(passed >= minRequired, `Expected at least ${minRequired} passed tests, but got ${passed}`)
 })

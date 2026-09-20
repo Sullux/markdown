@@ -61,7 +61,7 @@ const parseInline = (text, context = {}) => {
       parseCodeSpan(text, index) ||
       parseAutolink(text, index) ||
       parseInlineHtml(text, index) ||
-      parseImage(text, index) ||
+      parseImage(text, index, context) ||
       parseInlineLinks(text, index, parseInline, context) ||
       parseInlineTags(text, index, parseInline)
 
