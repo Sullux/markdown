@@ -1,8 +1,11 @@
+const { parseThematicBreak } = require('./thematic-break')
+
 const BULLET_RE = /^(\s*)([*+-])\s+(.*)$/
 const ORDERED_RE = /^(\s*)(\d+)[.)]\s+(.*)$/
 const TASK_RE = /^\[([ xX])\]\s+(.*)$/
 
 const parseMarker = (line) => {
+  if (parseThematicBreak(line)) return null
   const bMatch = line.match(BULLET_RE)
   if (bMatch) return { indent: bMatch[1].length, isOrdered: false, marker: bMatch[2], content: bMatch[3] }
   const oMatch = line.match(ORDERED_RE)
