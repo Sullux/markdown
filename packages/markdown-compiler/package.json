@@ -5,6 +5,7 @@
   "main": "./index.js",
   "scripts": {
     "test": "node --test test/**/*.test.js",
+    "test:conformance": "node test/conformance.js",
     "build": "node build.js",
     "deploy": "./deploy.sh"
   },

@@ -1,12 +1,15 @@
 const { parseInline } = require('./inline')
 
 const parseHeader = (line) => {
-  const match = line.match(/^(#{1,6})\s+(.*)$/)
+  const match = line.match(/^ {0,3}(#{1,6})(?:[ \t]+(.*?))?[ \t]*$/)
   if (!match) return null
+  const level = match[1].length
+  let content = match[2] || ''
+  content = content.replace(/(^|[ \t]+)(?<!\\)#+[ \t]*$/, '$1').trim()
   return {
     type: 'header',
-    level: match[1].length,
-    children: parseInline(match[2].trim()),
+    level,
+    children: content ? parseInline(content) : [],
   }
 }
 

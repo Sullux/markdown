@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "yarn workspaces run test"
+    "test": "yarn workspaces run test",
+    "test:conformance": "yarn --cwd packages/markdown-compiler test:conformance"
   }
 }

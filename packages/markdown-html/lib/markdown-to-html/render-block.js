@@ -14,8 +14,8 @@ const renderBlock = (node, options = {}) => {
     case 'header': {
       const text = renderInline(node.children, options)
       const rawText = node.children ? node.children.map((c) => (c.type === 'text' ? c.value : '')).join('') : ''
-      const slug = (options.slugify || slugify)(rawText, options.usedSlugs)
-      const html = `<h${node.level} id="${slug}">${text}</h${node.level}>\n`
+      const idAttr = options.headingIds !== false ? ` id="${(options.slugify || slugify)(rawText, options.usedSlugs)}"` : ''
+      const html = `<h${node.level}${idAttr}>${text}</h${node.level}>\n`
       return hasInlineMath(node.children) ? { html, head: KATEX_HEAD } : html
     }
     case 'paragraph': {
