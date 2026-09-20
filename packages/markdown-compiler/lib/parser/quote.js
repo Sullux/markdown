@@ -29,6 +29,7 @@ const parseQuote = (lines, startIndex, parseBlocks) => {
   const innerLines = []
   let i = startIndex
   let lastWasBlank = false
+  let inParagraph = false
 
   while (i < lines.length) {
     const line = lines[i]
@@ -36,8 +37,11 @@ const parseQuote = (lines, startIndex, parseBlocks) => {
       const content = line.replace(/^ {0,3}>[ \t]?/, '')
       innerLines.push(content)
       lastWasBlank = content.trim().length === 0
+      const isCode = content.startsWith('    ') || content.startsWith('\t') || /^ {0,3}(`{3,}|~{3,})/.test(content)
+      const isHeader = /^ {0,3}#{1,6}(?:[ \t]|$)/.test(content)
+      inParagraph = !lastWasBlank && !isCode && !isHeader
       i++
-    } else if (line.trim() && !lastWasBlank && !canInterruptLazy(line)) {
+    } else if (inParagraph && line.trim() && !lastWasBlank && !canInterruptLazy(line)) {
       const lazyLine = /^ {0,3}=+[ \t]*$/.test(line) ? line.replace(/^ {0,3}=/, '\\=') : line
       innerLines.push(lazyLine)
       i++
