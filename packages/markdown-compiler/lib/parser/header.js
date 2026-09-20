@@ -1,6 +1,6 @@
 const { parseInline } = require('./inline')
 
-const parseHeader = (line) => {
+const parseHeader = (line, context) => {
   const match = line.match(/^ {0,3}(#{1,6})(?:[ \t]+(.*?))?[ \t]*$/)
   if (!match) return null
   const level = match[1].length
@@ -9,7 +9,7 @@ const parseHeader = (line) => {
   return {
     type: 'header',
     level,
-    children: content ? parseInline(content) : [],
+    children: content ? parseInline(content, context) : [],
   }
 }
 

@@ -6,6 +6,7 @@ const { parseMath } = require('./math')
 const { parseQuote } = require('./quote')
 const { parseTable } = require('./table')
 const { parseList } = require('./list')
+const { parseLinkDef, collectLinkDefs } = require('./link-def')
 const { parseInline } = require('./inline')
 
 const isBlockStart = (lines, idx, parseBlocks) => {
@@ -20,23 +21,29 @@ const isBlockStart = (lines, idx, parseBlocks) => {
   if (parseTable(lines, idx)) return true
   if (parseQuote(lines, idx, parseBlocks)) return true
   if (parseList(lines, idx, parseBlocks)) return true
+  if (parseLinkDef(lines, idx)) return true
   return false
 }
 
-const parseBlocks = (text) => {
+const parseBlocks = (text, context = {}) => {
   if (!text || typeof text !== 'string') return []
   const lines = text.split('\n')
   const blocks = []
+  const defs = context.definitions || collectLinkDefs(lines)
+  const ctx = { ...context, definitions: defs }
   let i = 0
 
   while (i < lines.length) {
     const line = lines[i]
     if (!line.trim()) { i++; continue }
 
+    const linkDef = parseLinkDef(lines, i)
+    if (linkDef) { i = linkDef.nextIndex; continue }
+
     const hr = parseThematicBreak(line)
     if (hr) { blocks.push(hr); i++; continue }
 
-    const header = parseHeader(line)
+    const header = parseHeader(line, ctx)
     if (header) { blocks.push(header); i++; continue }
 
     const code = parseCodeBlock(lines, i)
@@ -54,10 +61,10 @@ const parseBlocks = (text) => {
     const table = parseTable(lines, i)
     if (table) { blocks.push(table.block); i = table.nextIndex; continue }
 
-    const quote = parseQuote(lines, i, parseBlocks)
+    const quote = parseQuote(lines, i, (t) => parseBlocks(t, ctx))
     if (quote) { blocks.push(quote.block); i = quote.nextIndex; continue }
 
-    const list = parseList(lines, i, parseBlocks)
+    const list = parseList(lines, i, (t) => parseBlocks(t, ctx))
     if (list) { blocks.push(list.block); i = list.nextIndex; continue }
 
     const pLines = [line]
@@ -67,7 +74,7 @@ const parseBlocks = (text) => {
       if (setextLevel) {
         i++
         const headingText = pLines.map((l) => l.trim()).join('\n')
-        blocks.push({ type: 'header', level: setextLevel, children: parseInline(headingText) })
+        blocks.push({ type: 'header', level: setextLevel, children: parseInline(headingText, ctx) })
         pLines.length = 0
         break
       }
@@ -76,7 +83,7 @@ const parseBlocks = (text) => {
       i++
     }
     if (pLines.length > 0) {
-      blocks.push({ type: 'paragraph', children: parseInline(pLines.join('\n')) })
+      blocks.push({ type: 'paragraph', children: parseInline(pLines.join('\n'), ctx) })
     }
   }
 

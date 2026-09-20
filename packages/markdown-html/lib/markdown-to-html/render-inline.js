@@ -22,8 +22,10 @@ const renderInline = (tokens, options = {}) => {
           return `<code>${escapeHtml(token.value)}</code>`
         case 'html':
           return token.value
-        case 'link':
-          return `<a href="${escapeHtml(token.url)}">${renderInline(token.children, options)}</a>`
+        case 'link': {
+          const titleAttr = token.title ? ` title="${escapeHtml(token.title)}"` : ''
+          return `<a href="${escapeHtml(token.url)}"${titleAttr}>${renderInline(token.children, options)}</a>`
+        }
         case 'wikilink':
           return `<a href="${escapeHtml(token.target)}">${escapeHtml(token.display)}</a>`
         case 'image': {
@@ -34,7 +36,8 @@ const renderInline = (tokens, options = {}) => {
             if (token.height) styles.push(`height: ${token.height}`)
             styleAttr = ` style="${styles.join('; ')};"`
           }
-          return `<img src="${escapeHtml(token.url)}" alt="${escapeHtml(token.alt)}"${styleAttr} />`
+          const titleAttr = token.title ? ` title="${escapeHtml(token.title)}"` : ''
+          return `<img src="${escapeHtml(token.url)}" alt="${escapeHtml(token.alt)}"${titleAttr}${styleAttr} />`
         }
         case 'checkbox':
           return `<input type="checkbox"${token.checked ? ' checked' : ''} disabled /> `

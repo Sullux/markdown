@@ -19,10 +19,10 @@ const pushText = (tokens, val) => {
   }
 }
 
-const parseInline = (text) => {
+const parseInline = (text, context = {}) => {
   if (!text) return []
-  if (text.startsWith('[ ] ')) return [{ type: 'checkbox', checked: false }, ...parseInline(text.slice(4))]
-  if (/^\[[xX]\] /.test(text)) return [{ type: 'checkbox', checked: true }, ...parseInline(text.slice(4))]
+  if (text.startsWith('[ ] ')) return [{ type: 'checkbox', checked: false }, ...parseInline(text.slice(4), context)]
+  if (/^\[[xX]\] /.test(text)) return [{ type: 'checkbox', checked: true }, ...parseInline(text.slice(4), context)]
 
   const tokens = []
   let index = 0
@@ -77,7 +77,7 @@ const parseInline = (text) => {
       parseAutolink(text, index) ||
       parseInlineHtml(text, index) ||
       parseImage(text, index) ||
-      parseInlineLinks(text, index, parseInline) ||
+      parseInlineLinks(text, index, parseInline, context) ||
       parseInlineTags(text, index, parseInline)
 
     if (tokenRes) {
