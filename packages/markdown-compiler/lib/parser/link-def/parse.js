@@ -2,7 +2,7 @@ const { unescapeBackslashes, normalizeUrl } = require('../unescape')
 const { decodeEntities } = require('../entities')
 
 const normalizeLabel = (str) =>
-  unescapeBackslashes(str || '').trim().replace(/\s+/g, ' ').toLowerCase()
+  (str || '').trim().replace(/\s+/g, ' ').replace(/\\([\[\]])/g, '$1').replace(/ẞ/g, 'ss').replace(/ß/g, 'ss').toLowerCase()
 
 const parseLinkDef = (lines, startIndex) => {
   let i = startIndex
@@ -14,7 +14,7 @@ const parseLinkDef = (lines, startIndex) => {
     header += '\n' + lines[i]
   }
   const labelMatch = header.match(/^ {0,3}\[((?:\\\]|[^\]])+)\]:[ \t]*(.*)$/)
-  if (!labelMatch || /(?:^|[^\\])\[/.test(labelMatch[1])) return null
+  if (!labelMatch || !labelMatch[1].trim() || /(?:^|[^\\])\[/.test(labelMatch[1])) return null
 
   const label = labelMatch[1]
   let rest = labelMatch[2]

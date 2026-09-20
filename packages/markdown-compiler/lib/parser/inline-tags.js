@@ -7,6 +7,18 @@ const indexOfUnescaped = (text, marker, fromIndex) => {
       const cs = parseCodeSpan(text, pos)
       if (cs) { pos += cs.consumedLength; continue }
     }
+    if (text[pos] === '[') {
+      const bClose = text.indexOf(']', pos)
+      if (bClose !== -1) {
+        if (text.charAt(bClose + 1) === '(') {
+          const pClose = text.indexOf(')', bClose + 1)
+          if (pClose !== -1) { pos = pClose + 1; continue }
+        } else if (text.charAt(bClose + 1) === '[') {
+          const rClose = text.indexOf(']', bClose + 2)
+          if (rClose !== -1) { pos = rClose + 1; continue }
+        }
+      }
+    }
     const idx = text.indexOf(marker, pos)
     if (idx === -1) return -1
     const nextTick = text.indexOf('`', pos)
