@@ -16,6 +16,9 @@ const indexOfUnescaped = (text, marker, fromIndex) => {
         } else if (text.charAt(bClose + 1) === '[') {
           const rClose = text.indexOf(']', bClose + 2)
           if (rClose !== -1) { pos = rClose + 1; continue }
+        } else {
+          pos = bClose + 1
+          continue
         }
       }
     }
@@ -34,17 +37,17 @@ const indexOfUnescaped = (text, marker, fromIndex) => {
   return -1
 }
 
-const parseTag = (text, index, marker, type, parseInline) => {
+const parseTag = (text, index, marker, type, parseInline, context) => {
   if (!text.startsWith(marker, index)) return null
   const len = marker.length
   const close = indexOfUnescaped(text, marker, index + len)
   if (close === -1 || close <= index + len) return null
   const inner = text.slice(index + len, close)
   if (!inner.trim()) return null
-  return { token: { type, children: parseInline(inner) }, consumedLength: close + len - index }
+  return { token: { type, children: parseInline(inner, context) }, consumedLength: close + len - index }
 }
 
-const parseUnderscoreTag = (text, index, marker, type, parseInline) => {
+const parseUnderscoreTag = (text, index, marker, type, parseInline, context) => {
   if (!text.startsWith(marker, index)) return null
   const len = marker.length
   const prevChar = index > 0 ? text[index - 1] : ' '
@@ -60,7 +63,7 @@ const parseUnderscoreTag = (text, index, marker, type, parseInline) => {
     if (!/\s/.test(charBefore) && !/[a-zA-Z0-9]/.test(charAfter)) {
       const inner = text.slice(index + len, close)
       if (inner.trim().length > 0) {
-        return { token: { type, children: parseInline(inner) }, consumedLength: close + len - index }
+        return { token: { type, children: parseInline(inner, context) }, consumedLength: close + len - index }
       }
     }
     pos = close + 1
@@ -68,11 +71,11 @@ const parseUnderscoreTag = (text, index, marker, type, parseInline) => {
   return null
 }
 
-const parseInlineTags = (text, index, parseInline) =>
-  parseTag(text, index, '~~', 'strikethrough', parseInline) ||
-  parseTag(text, index, '**', 'bold', parseInline) ||
-  parseTag(text, index, '*', 'italic', parseInline) ||
-  parseUnderscoreTag(text, index, '__', 'bold', parseInline) ||
-  parseUnderscoreTag(text, index, '_', 'italic', parseInline)
+const parseInlineTags = (text, index, parseInline, context) =>
+  parseTag(text, index, '~~', 'strikethrough', parseInline, context) ||
+  parseTag(text, index, '**', 'bold', parseInline, context) ||
+  parseTag(text, index, '*', 'italic', parseInline, context) ||
+  parseUnderscoreTag(text, index, '__', 'bold', parseInline, context) ||
+  parseUnderscoreTag(text, index, '_', 'italic', parseInline, context)
 
 module.exports = { parseInlineTags, indexOfUnescaped }

@@ -76,11 +76,13 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
     }
   }
 
-  const def = context.definitions?.get(normalizeLabel(linkText))
-  if (def) {
-    return {
-      token: { type: 'link', url: def.url, title: def.title, children: parseInline(linkText, innerCtx) },
-      consumedLength: textClose + 1 - index,
+  if (text.charAt(textClose + 1) !== '[') {
+    const def = context.definitions?.get(normalizeLabel(linkText))
+    if (def) {
+      return {
+        token: { type: 'link', url: def.url, title: def.title, children: parseInline(linkText, innerCtx) },
+        consumedLength: textClose + 1 - index,
+      }
     }
   }
   return null

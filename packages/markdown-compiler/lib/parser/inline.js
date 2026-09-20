@@ -65,7 +65,7 @@ const parseInline = (text, context = {}) => {
       parseImage(text, index, context) ||
       parseInlineLinks(text, index, parseInline, context) ||
       parseInlineMath(text, index) ||
-      parseInlineTags(text, index, parseInline)
+      parseInlineTags(text, index, parseInline, context)
 
     if (tokenRes) {
       tokens.push(tokenRes.token)
