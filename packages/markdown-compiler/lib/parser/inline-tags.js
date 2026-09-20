@@ -42,23 +42,44 @@ const parseInlineTags = (text, index, parseInline) => {
     }
   }
 
-  if (text.startsWith('$', index) && !text.startsWith('$$', index)) {
-    const isEscaped = index > 0 && text[index - 1] === '\\'
-    const nextChar = text[index + 1]
-    const hasValidOpen = nextChar && ![' ', '\t', '\n', '$'].includes(nextChar)
-    if (!isEscaped && hasValidOpen) {
-      let close = index + 1
-      while (close < text.length) {
-        if (text[close] === '$' && text[close - 1] !== '\\') {
-          const prevChar = text[close - 1]
-          if (![' ', '\t', '\n'].includes(prevChar)) {
-            const mathValue = text.slice(index + 1, close)
-            if (!mathValue.includes('\n')) {
-              return { token: { type: 'inlineMath', value: mathValue }, consumedLength: close + 1 - index }
-            }
+  if (text.startsWith('__', index)) {
+    const prevChar = index > 0 ? text[index - 1] : ' '
+    const nextChar = text[index + 2] || ' '
+    if (!/[a-zA-Z0-9]/.test(prevChar) && !/\s/.test(nextChar)) {
+      let pos = index + 2
+      while (pos < text.length) {
+        const close = indexOfUnescaped(text, '__', pos)
+        if (close === -1) break
+        const charBefore = text[close - 1]
+        const charAfter = text[close + 2] || ' '
+        if (!/\s/.test(charBefore) && !/[a-zA-Z0-9]/.test(charAfter)) {
+          const inner = text.slice(index + 2, close)
+          if (inner.trim().length > 0) {
+            return { token: { type: 'bold', children: parseInline(inner) }, consumedLength: close + 2 - index }
           }
         }
-        close++
+        pos = close + 1
+      }
+    }
+  }
+
+  if (text.startsWith('_', index)) {
+    const prevChar = index > 0 ? text[index - 1] : ' '
+    const nextChar = text[index + 1] || ' '
+    if (!/[a-zA-Z0-9]/.test(prevChar) && !/\s/.test(nextChar)) {
+      let pos = index + 1
+      while (pos < text.length) {
+        const close = indexOfUnescaped(text, '_', pos)
+        if (close === -1) break
+        const charBefore = text[close - 1]
+        const charAfter = text[close + 1] || ' '
+        if (!/\s/.test(charBefore) && !/[a-zA-Z0-9]/.test(charAfter)) {
+          const inner = text.slice(index + 1, close)
+          if (inner.trim().length > 0) {
+            return { token: { type: 'italic', children: parseInline(inner) }, consumedLength: close + 1 - index }
+          }
+        }
+        pos = close + 1
       }
     }
   }

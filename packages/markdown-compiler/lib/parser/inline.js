@@ -1,4 +1,5 @@
 const { parseBreak } = require('./break')
+const { parseInlineMath } = require('./math')
 const { parseImage } = require('./image')
 const { parseWikilink } = require('./wikilink')
 const { parseCodeSpan } = require('./code-span')
@@ -63,6 +64,7 @@ const parseInline = (text, context = {}) => {
       parseInlineHtml(text, index) ||
       parseImage(text, index, context) ||
       parseInlineLinks(text, index, parseInline, context) ||
+      parseInlineMath(text, index) ||
       parseInlineTags(text, index, parseInline)
 
     if (tokenRes) {
