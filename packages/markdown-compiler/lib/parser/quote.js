@@ -38,7 +38,8 @@ const parseQuote = (lines, startIndex, parseBlocks) => {
       lastWasBlank = content.trim().length === 0
       i++
     } else if (line.trim() && !lastWasBlank && !canInterruptLazy(line)) {
-      innerLines.push(line)
+      const lazyLine = /^ {0,3}=+[ \t]*$/.test(line) ? line.replace(/^ {0,3}=/, '\\=') : line
+      innerLines.push(lazyLine)
       i++
     } else {
       break

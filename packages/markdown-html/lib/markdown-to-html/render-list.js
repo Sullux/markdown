@@ -13,8 +13,10 @@ const renderListItem = (item, options, tight, renderBlock, hasInlineMath, KATEX_
   }
 
   let head = []
+  let isInlineFirst = false
   const childrenHtml = (item.children || []).map((child, idx) => {
     if (child.type === 'paragraph' && tight && idx === 0) {
+      isInlineFirst = true
       if (hasInlineMath(child.children)) head = head.concat(KATEX_HEAD)
       return renderInline(child.children, options)
     }
@@ -23,7 +25,8 @@ const renderListItem = (item, options, tight, renderBlock, hasInlineMath, KATEX_
     return typeof res === 'string' ? res : res?.html || ''
   }).join('')
 
-  return { html: `<li${taskClass}>${checkHtml}${childrenHtml}</li>\n`, head }
+  const prefix = isInlineFirst || !childrenHtml ? '' : '\n'
+  return { html: `<li${taskClass}>${checkHtml}${prefix}${childrenHtml}</li>\n`, head }
 }
 
 const renderList = (node, options, renderBlock, hasInlineMath, KATEX_HEAD) => {
