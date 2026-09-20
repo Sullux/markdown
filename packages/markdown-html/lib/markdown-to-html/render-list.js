@@ -15,10 +15,11 @@ const renderListItem = (item, options, tight, renderBlock, hasInlineMath, KATEX_
   let head = []
   let isInlineFirst = false
   const childrenHtml = (item.children || []).map((child, idx) => {
-    if (child.type === 'paragraph' && tight && idx === 0) {
-      isInlineFirst = true
+    if (child.type === 'paragraph' && tight) {
+      if (idx === 0) isInlineFirst = true
       if (hasInlineMath(child.children)) head = head.concat(KATEX_HEAD)
-      return renderInline(child.children, options)
+      const inline = renderInline(child.children, options)
+      return idx === 0 ? inline : (item.children[idx - 1]?.type === 'paragraph' ? `\n${inline}` : inline)
     }
     const res = renderBlock(child, options)
     if (typeof res === 'object' && Array.isArray(res.head)) head = head.concat(res.head)
@@ -42,7 +43,7 @@ const renderList = (node, options, renderBlock, hasInlineMath, KATEX_HEAD) => {
     return res.html
   }).join('')
 
-  const startAttr = isOrdered && node.start && node.start !== 1 ? ` start="${node.start}"` : ''
+  const startAttr = isOrdered && node.start !== undefined && node.start !== 1 ? ` start="${node.start}"` : ''
   const tag = isOrdered ? 'ol' : 'ul'
   return { html: `<${tag}${startAttr}>\n${itemsHtml}</${tag}>\n`, head }
 }
