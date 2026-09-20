@@ -41,7 +41,7 @@ const renderInline = (tokens, options = {}) => {
           return `<span class="math-inline" data-latex="${escapeHtml(token.value)}">$${escapeHtml(token.value)}$</span>`
         }
         case 'br':
-          return '<br />'
+          return '<br />\n'
         default:
           return escapeHtml(token.value || '')
       }

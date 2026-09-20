@@ -33,10 +33,6 @@ const parseInlineTags = (text, index, parseInline) => {
     }
   }
 
-  if (text.startsWith('  \n', index)) {
-    return { token: { type: 'br' }, consumedLength: 3 }
-  }
-
   if (text.startsWith('$', index) && !text.startsWith('$$', index)) {
     const isEscaped = index > 0 && text[index - 1] === '\\'
     const nextChar = text[index + 1]
