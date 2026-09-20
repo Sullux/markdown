@@ -18,17 +18,23 @@ const parseDelimiter = (text, index) => {
   const nextChar = index + run < text.length ? text[index + run] : ' '
   const flanking = getFlanking(prevChar, nextChar, char)
   return {
-    token: {
-      type: 'delimiter',
-      char,
-      length: run,
-      originalLength: run,
-      canOpen: flanking.canOpen,
-      canClose: flanking.canClose,
-    },
+    token: { type: 'delimiter', char, length: run, originalLength: run, ...flanking },
     consumedLength: run,
   }
 }
+
+const cleanTokens = (tokens) =>
+  tokens.reduce((acc, t) => {
+    const node = t.type === 'delimiter'
+      ? { type: 'text', value: t.char.repeat(t.length) }
+      : (t.children ? { ...t, children: cleanTokens(t.children) } : t)
+    if (node.type === 'text' && acc.length && acc[acc.length - 1].type === 'text') {
+      acc[acc.length - 1].value += node.value
+    } else {
+      acc.push(node)
+    }
+    return acc
+  }, [])
 
 const processDelimiters = (tokens) => {
   let closeIdx = 0
@@ -81,15 +87,7 @@ const processDelimiters = (tokens) => {
     }
   }
 
-  return tokens.reduce((acc, t) => {
-    const node = t.type === 'delimiter' ? { type: 'text', value: t.char.repeat(t.length) } : t
-    if (node.type === 'text' && acc.length && acc[acc.length - 1].type === 'text') {
-      acc[acc.length - 1].value += node.value
-    } else {
-      acc.push(node)
-    }
-    return acc
-  }, [])
+  return cleanTokens(tokens)
 }
 
 module.exports = { parseDelimiter, processDelimiters }
