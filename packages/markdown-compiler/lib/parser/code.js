@@ -1,4 +1,5 @@
 const { unescapeBackslashes } = require('./unescape')
+const { decodeEntities } = require('./entities')
 
 const parseCodeFenceHeader = (line) => {
   const match = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*(.*)$/)
@@ -15,7 +16,7 @@ const parseCodeFenceHeader = (line) => {
   }
   const spaceIdx = rawInfo.indexOf(' ')
   const rawLang = spaceIdx === -1 ? rawInfo : rawInfo.slice(0, spaceIdx).trim()
-  const lang = unescapeBackslashes(rawLang)
+  const lang = decodeEntities(unescapeBackslashes(rawLang))
   const meta = spaceIdx === -1 ? undefined : (rawInfo.slice(spaceIdx + 1).trim() || undefined)
   return { fenceLen: fence.length, fenceChar: fence[0], indent, language: lang || null, languageMetadata: meta }
 }

@@ -1,4 +1,5 @@
-const { unescapeBackslashes } = require('./unescape')
+const { unescapeBackslashes, normalizeUrl } = require('./unescape')
+const { decodeEntities } = require('./entities')
 
 const normalizeLabel = (str) =>
   (str || '').trim().replace(/\s+/g, ' ').toLowerCase()
@@ -54,8 +55,8 @@ const parseLinkDef = (lines, startIndex) => {
   return {
     def: {
       label,
-      url: unescapeBackslashes(url),
-      title: title !== undefined ? unescapeBackslashes(title) : undefined,
+      url: normalizeUrl(decodeEntities(unescapeBackslashes(url))),
+      title: title !== undefined ? decodeEntities(unescapeBackslashes(title)) : undefined,
     },
     nextIndex: i + 1,
   }

@@ -1,5 +1,6 @@
 const { normalizeLabel } = require('./link-def')
-const { unescapeBackslashes } = require('./unescape')
+const { unescapeBackslashes, normalizeUrl } = require('./unescape')
+const { decodeEntities } = require('./entities')
 
 const parseInlineLinks = (text, index, parseInline, context = {}) => {
   if (!text.startsWith('[', index)) return null
@@ -38,16 +39,26 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
 
     if (urlClose !== -1) {
       const rawContent = text.slice(textClose + 2, urlClose).trim()
-      let url = rawContent
-      let title = undefined
-      const titleMatch = rawContent.match(/^(\S+)(?:[ \t]+(?:"([^"]*)"|'([^']*)'|\(([^)]*)\)))?$/)
-      if (titleMatch) {
-        url = unescapeBackslashes(titleMatch[1])
-        const rawTitle = titleMatch[2] !== undefined ? titleMatch[2] : (titleMatch[3] !== undefined ? titleMatch[3] : titleMatch[4])
-        title = unescapeBackslashes(rawTitle)
+      let dest = ''
+      let rest = ''
+      if (rawContent.startsWith('<')) {
+        const closeAngle = rawContent.indexOf('>')
+        if (closeAngle === -1) return null
+        dest = rawContent.slice(1, closeAngle)
+        rest = rawContent.slice(closeAngle + 1).trim()
       } else {
-        url = unescapeBackslashes(rawContent)
+        const sp = rawContent.search(/\s/)
+        dest = sp === -1 ? rawContent : rawContent.slice(0, sp)
+        rest = sp === -1 ? '' : rawContent.slice(sp).trim()
       }
+      let title = undefined
+      if (rest) {
+        const tm = rest.match(/^(?:"([^"]*)"|'([^']*)'|\(([^)]*)\))$/)
+        if (!tm) return null
+        const rawTitle = tm[1] !== undefined ? tm[1] : (tm[2] !== undefined ? tm[2] : tm[3])
+        title = decodeEntities(unescapeBackslashes(rawTitle))
+      }
+      const url = normalizeUrl(decodeEntities(unescapeBackslashes(dest)))
       return {
         token: { type: 'link', url, title, children: parseInline(linkText, context) },
         consumedLength: urlClose + 1 - index,

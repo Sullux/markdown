@@ -34,4 +34,22 @@ const parseEntity = (text, index) => {
   return null
 }
 
-module.exports = { parseEntity, ENTITIES }
+const decodeEntities = (str) => {
+  if (!str || !str.includes('&')) return str
+  return str.replace(/&(?:#x([0-9a-fA-F]{1,6})|#([0-9]{1,7})|([a-zA-Z0-9]+));/g, (match, hex, dec, named) => {
+    if (hex) {
+      const val = parseInt(hex, 16)
+      return val === 0 || val > 0x10ffff ? '\uFFFD' : String.fromCodePoint(val)
+    }
+    if (dec) {
+      const val = parseInt(dec, 10)
+      return val === 0 || val > 0x10ffff ? '\uFFFD' : String.fromCodePoint(val)
+    }
+    if (named && ENTITIES[named] !== undefined) {
+      return ENTITIES[named]
+    }
+    return match
+  })
+}
+
+module.exports = { parseEntity, decodeEntities, ENTITIES }
