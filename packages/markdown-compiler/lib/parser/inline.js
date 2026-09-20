@@ -6,11 +6,11 @@ const { parseCodeSpan } = require('./code-span')
 const { parseAutolink } = require('./autolink')
 const { parseInlineHtml } = require('./inline-html')
 const { parseEntity } = require('./entities')
-const { parseInlineTags } = require('./inline-tags')
+const { parseDelimiter, processDelimiters } = require('./delimiters')
 const { parseInlineLinks } = require('./inline-links')
 
 const ASCII_PUNC = /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/
-const TAG_MARKERS = ['[[', '**', '*', '~~', '`', '[', '![', '$', '\\', '<', '\n', '&']
+const TAG_MARKERS = ['[[', '*', '_', '~', '`', '[', '![', '$', '\\', '<', '\n', '&']
 
 const pushText = (tokens, val) => {
   if (!val) return
@@ -65,7 +65,7 @@ const parseInline = (text, context = {}) => {
       parseImage(text, index, context) ||
       parseInlineLinks(text, index, parseInline, context) ||
       parseInlineMath(text, index) ||
-      parseInlineTags(text, index, parseInline, context)
+      parseDelimiter(text, index)
 
     if (tokenRes) {
       tokens.push(tokenRes.token)
@@ -87,7 +87,7 @@ const parseInline = (text, context = {}) => {
     index = nextTagIndex
   }
 
-  return tokens
+  return processDelimiters(tokens)
 }
 
 module.exports = { parseInline, pushText }
