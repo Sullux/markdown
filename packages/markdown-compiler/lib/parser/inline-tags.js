@@ -1,27 +1,33 @@
+const indexOfUnescaped = (text, marker, fromIndex) => {
+  let pos = fromIndex
+  while (pos < text.length) {
+    const idx = text.indexOf(marker, pos)
+    if (idx === -1) return -1
+    let slashes = 0, p = idx - 1
+    while (p >= fromIndex && text[p] === '\\') { slashes++; p-- }
+    if (slashes % 2 === 0) return idx
+    pos = idx + marker.length
+  }
+  return -1
+}
+
 const parseInlineTags = (text, index, parseInline) => {
   if (text.startsWith('~~', index)) {
-    const close = text.indexOf('~~', index + 2)
+    const close = indexOfUnescaped(text, '~~', index + 2)
     if (close !== -1) {
       return { token: { type: 'strikethrough', children: parseInline(text.slice(index + 2, close)) }, consumedLength: close + 2 - index }
     }
   }
 
-  if (text.startsWith('`', index)) {
-    const codeClose = text.indexOf('`', index + 1)
-    if (codeClose !== -1) {
-      return { token: { type: 'code', value: text.slice(index + 1, codeClose) }, consumedLength: codeClose + 1 - index }
-    }
-  }
-
   if (text.startsWith('**', index)) {
-    const boldClose = text.indexOf('**', index + 2)
+    const boldClose = indexOfUnescaped(text, '**', index + 2)
     if (boldClose !== -1) {
       return { token: { type: 'bold', children: parseInline(text.slice(index + 2, boldClose)) }, consumedLength: boldClose + 2 - index }
     }
   }
 
   if (text.startsWith('*', index)) {
-    const italicClose = text.indexOf('*', index + 1)
+    const italicClose = indexOfUnescaped(text, '*', index + 1)
     if (italicClose !== -1) {
       return { token: { type: 'italic', children: parseInline(text.slice(index + 1, italicClose)) }, consumedLength: italicClose + 1 - index }
     }
@@ -55,4 +61,4 @@ const parseInlineTags = (text, index, parseInline) => {
   return null
 }
 
-module.exports = { parseInlineTags }
+module.exports = { parseInlineTags, indexOfUnescaped }

@@ -1,10 +1,23 @@
 const { parseImage } = require('./image')
+const { parseWikilink } = require('./wikilink')
+const { parseCodeSpan } = require('./code-span')
 const { parseInlineTags } = require('./inline-tags')
 const { parseInlineLinks } = require('./inline-links')
 
+const ASCII_PUNC = /[!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]/
+const TAG_MARKERS = ['[[', '**', '*', '~~', '`', '[', '![', '  \n', '$', '\\']
+
+const pushText = (tokens, val) => {
+  if (!val) return
+  if (tokens.length > 0 && tokens[tokens.length - 1].type === 'text') {
+    tokens[tokens.length - 1].value += val
+  } else {
+    tokens.push({ type: 'text', value: val })
+  }
+}
+
 const parseInline = (text) => {
   if (!text) return []
-
   const tokens = []
   let index = 0
 
@@ -19,25 +32,35 @@ const parseInline = (text) => {
       index = 4
       continue
     }
-
-    if (text.startsWith('[[', index)) {
-      const closeIdx = text.indexOf(']]', index + 2)
-      if (closeIdx !== -1) {
-        const rawContent = text.slice(index + 2, closeIdx)
-        const pipeIdx = rawContent.indexOf('|')
-        let target = rawContent
-        let display = rawContent
-        if (pipeIdx !== -1) {
-          target = rawContent.slice(0, pipeIdx).trim()
-          display = rawContent.slice(pipeIdx + 1).trim()
-        } else {
-          target = target.trim()
-          display = target
-        }
-        tokens.push({ type: 'wikilink', target, display })
-        index = closeIdx + 2
+    if (text[index] === '\\') {
+      const next = text[index + 1]
+      if (next === '\n') {
+        tokens.push({ type: 'br' })
+        index += 2
         continue
       }
+      if (next && ASCII_PUNC.test(next)) {
+        pushText(tokens, next)
+        index += 2
+        continue
+      }
+      pushText(tokens, '\\')
+      index += 1
+      continue
+    }
+
+    const wiki = parseWikilink(text, index)
+    if (wiki) {
+      tokens.push(wiki.token)
+      index += wiki.consumedLength
+      continue
+    }
+
+    const codeSpan = parseCodeSpan(text, index)
+    if (codeSpan) {
+      tokens.push(codeSpan.token)
+      index += codeSpan.consumedLength
+      continue
     }
 
     const imgResult = parseImage(text, index)
@@ -61,16 +84,14 @@ const parseInline = (text) => {
       continue
     }
 
-    const candidateIndices = ['[[', '**', '*', '~~', '`', '[', '![', '  \n', '$']
-      .map((marker) => text.indexOf(marker, index))
-      .filter((pos) => pos > index)
+    const candidateIndices = TAG_MARKERS.map((m) => text.indexOf(m, index)).filter((p) => p > index)
     const nextTagIndex = candidateIndices.length > 0 ? Math.min(...candidateIndices) : text.length
 
-    tokens.push({ type: 'text', value: text.slice(index, nextTagIndex) })
+    pushText(tokens, text.slice(index, nextTagIndex))
     index = nextTagIndex
   }
 
   return tokens
 }
 
-module.exports = { parseInline }
+module.exports = { parseInline, pushText }
