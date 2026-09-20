@@ -17,7 +17,7 @@ const isBlockStart = (lines, idx, parseBlocks) => {
   const trimmed = line.trim()
   if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) return true
   if (trimmed.startsWith('$$')) return true
-  if (parseHtml(lines, idx)) return true
+  if (parseHtml(lines, idx, true)) return true
   if (parseTable(lines, idx)) return true
   if (parseQuote(lines, idx, parseBlocks)) return true
   if (parseList(lines, idx, parseBlocks)) return true

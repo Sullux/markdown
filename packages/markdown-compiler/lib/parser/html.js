@@ -11,19 +11,27 @@ const TYPE_5_CLOSE = /\]\]>/
 const BLOCK_TAGS = 'address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul'
 const TYPE_6_OPEN = new RegExp(`^ {0,3}<\\/?(?:${BLOCK_TAGS})(?:\\s|>|\\/>|$)`, 'i')
 
-const getHtmlBlockMatcher = (firstLine) => {
+const TAG_NAME = '[a-zA-Z][a-zA-Z0-9-]*'
+const ATTR_NAME = '[a-zA-Z_:][a-zA-Z0-9_.:-]*'
+const ATTR_VAL = '(?:[^ \\t\\n\\f"\'=<>`]+|\'[^\']*\'|"[^"]*")'
+const ATTRIBUTE = '(?:[ \\t]+' + ATTR_NAME + '(?:[ \\t]*=[ \\t]*' + ATTR_VAL + ')?)'
+const TYPE_7_OPEN = new RegExp('^ {0,3}<' + TAG_NAME + ATTRIBUTE + '*[ \\t]*\\/?>[ \\t]*$', 'i')
+const TYPE_7_CLOSE = new RegExp('^ {0,3}<\\/' + TAG_NAME + '[ \\t]*>[ \\t]*$', 'i')
+
+const getHtmlBlockMatcher = (firstLine, canBeType7 = true) => {
   if (TYPE_1_OPEN.test(firstLine)) return (l) => TYPE_1_CLOSE.test(l)
   if (TYPE_2_OPEN.test(firstLine)) return (l) => TYPE_2_CLOSE.test(l)
   if (TYPE_3_OPEN.test(firstLine)) return (l) => TYPE_3_CLOSE.test(l)
   if (TYPE_4_OPEN.test(firstLine)) return (l) => TYPE_4_CLOSE.test(l)
   if (TYPE_5_OPEN.test(firstLine)) return (l) => TYPE_5_CLOSE.test(l)
   if (TYPE_6_OPEN.test(firstLine)) return null
+  if (canBeType7 && (TYPE_7_OPEN.test(firstLine) || TYPE_7_CLOSE.test(firstLine))) return null
   return undefined
 }
 
-const parseHtml = (lines, startIndex) => {
+const parseHtml = (lines, startIndex, isParagraphInterrupt = false) => {
   const first = lines[startIndex]
-  const closer = getHtmlBlockMatcher(first)
+  const closer = getHtmlBlockMatcher(first, !isParagraphInterrupt)
   if (closer === undefined) return null
 
   const htmlLines = [first]
