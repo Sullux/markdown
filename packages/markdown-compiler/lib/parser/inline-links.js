@@ -1,5 +1,6 @@
 const { normalizeLabel } = require('./link-def')
 const { parseDestAndTitle } = require('./link-utils')
+const { parseCodeSpan } = require('./code-span')
 
 const parseInlineLinks = (text, index, parseInline, context = {}) => {
   if (!text.startsWith('[', index)) return null
@@ -7,6 +8,13 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
   let bracketDepth = 0
   let textClose = -1
   for (let i = index; i < text.length; i++) {
+    if (text[i] === '`') {
+      const cs = parseCodeSpan(text, i)
+      if (cs) {
+        i += cs.consumedLength - 1
+        continue
+      }
+    }
     const char = text.charAt(i)
     if (char === '[') bracketDepth++
     else if (char === ']') {
