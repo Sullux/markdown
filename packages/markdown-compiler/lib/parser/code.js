@@ -1,3 +1,5 @@
+const { unescapeBackslashes } = require('./unescape')
+
 const parseCodeFenceHeader = (line) => {
   const match = line.match(/^ {0,3}(`{3,}|~{3,})[ \t]*(.*)$/)
   if (!match) return null
@@ -12,12 +14,10 @@ const parseCodeFenceHeader = (line) => {
     return { fenceLen: fence.length, fenceChar: fence[0], indent, language: null, languageMetadata: undefined }
   }
   const spaceIdx = rawInfo.indexOf(' ')
-  if (spaceIdx === -1) {
-    return { fenceLen: fence.length, fenceChar: fence[0], indent, language: rawInfo, languageMetadata: undefined }
-  }
-  const language = rawInfo.slice(0, spaceIdx).trim()
-  const languageMetadata = rawInfo.slice(spaceIdx + 1).trim()
-  return { fenceLen: fence.length, fenceChar: fence[0], indent, language: language || null, languageMetadata: languageMetadata || undefined }
+  const rawLang = spaceIdx === -1 ? rawInfo : rawInfo.slice(0, spaceIdx).trim()
+  const lang = unescapeBackslashes(rawLang)
+  const meta = spaceIdx === -1 ? undefined : (rawInfo.slice(spaceIdx + 1).trim() || undefined)
+  return { fenceLen: fence.length, fenceChar: fence[0], indent, language: lang || null, languageMetadata: meta }
 }
 
 const parseCodeBlock = (lines, startIndex) => {
@@ -63,7 +63,8 @@ const parseIndentedCodeBlock = (lines, startIndex) => {
       let peek = i + 1
       while (peek < lines.length && !lines[peek].trim()) peek++
       if (peek < lines.length && (lines[peek].startsWith('    ') || lines[peek].startsWith('\t'))) {
-        codeLines.push('')
+        const stripped = line.startsWith('    ') ? line.slice(4) : (line.startsWith('\t') ? line.slice(1) : '')
+        codeLines.push(stripped)
         i++
         continue
       }

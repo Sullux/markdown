@@ -1,3 +1,5 @@
+const { unescapeBackslashes } = require('./unescape')
+
 const normalizeLabel = (str) =>
   (str || '').trim().replace(/\s+/g, ' ').toLowerCase()
 
@@ -50,7 +52,11 @@ const parseLinkDef = (lines, startIndex) => {
   }
 
   return {
-    def: { label, url, title },
+    def: {
+      label,
+      url: unescapeBackslashes(url),
+      title: title !== undefined ? unescapeBackslashes(title) : undefined,
+    },
     nextIndex: i + 1,
   }
 }

@@ -1,4 +1,5 @@
 const { normalizeLabel } = require('./link-def')
+const { unescapeBackslashes } = require('./unescape')
 
 const parseInlineLinks = (text, index, parseInline, context = {}) => {
   if (!text.startsWith('[', index)) return null
@@ -41,8 +42,11 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
       let title = undefined
       const titleMatch = rawContent.match(/^(\S+)(?:[ \t]+(?:"([^"]*)"|'([^']*)'|\(([^)]*)\)))?$/)
       if (titleMatch) {
-        url = titleMatch[1]
-        title = titleMatch[2] !== undefined ? titleMatch[2] : (titleMatch[3] !== undefined ? titleMatch[3] : titleMatch[4])
+        url = unescapeBackslashes(titleMatch[1])
+        const rawTitle = titleMatch[2] !== undefined ? titleMatch[2] : (titleMatch[3] !== undefined ? titleMatch[3] : titleMatch[4])
+        title = unescapeBackslashes(rawTitle)
+      } else {
+        url = unescapeBackslashes(rawContent)
       }
       return {
         token: { type: 'link', url, title, children: parseInline(linkText, context) },
