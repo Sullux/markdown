@@ -21,7 +21,6 @@ const isBlockStart = (lines, idx, parseBlocks) => {
   if (parseTable(lines, idx)) return true
   if (parseQuote(lines, idx, parseBlocks)) return true
   if (parseList(lines, idx, parseBlocks)) return true
-  if (parseLinkDef(lines, idx)) return true
   return false
 }
 

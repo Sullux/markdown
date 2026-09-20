@@ -16,12 +16,17 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
       }
     }
     const char = text.charAt(i)
-    if (char === '[') bracketDepth++
-    else if (char === ']') {
-      bracketDepth--
-      if (bracketDepth === 0) {
-        textClose = i
-        break
+    let slashes = 0, p = i - 1
+    while (p >= index && text[p] === '\\') { slashes++; p-- }
+    const isEscaped = slashes % 2 === 1
+    if (!isEscaped) {
+      if (char === '[') bracketDepth++
+      else if (char === ']') {
+        bracketDepth--
+        if (bracketDepth === 0) {
+          textClose = i
+          break
+        }
       }
     }
   }
