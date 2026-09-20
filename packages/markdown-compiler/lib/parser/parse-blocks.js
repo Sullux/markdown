@@ -1,6 +1,6 @@
-const { parseHeader } = require('./header')
+const { parseHeader, parseSetextUnderline } = require('./header')
 const { parseThematicBreak } = require('./thematic-break')
-const { parseCodeBlock } = require('./code')
+const { parseCodeBlock, parseIndentedCodeBlock } = require('./code')
 const { parseHtml } = require('./html')
 const { parseMath } = require('./math')
 const { parseQuote } = require('./quote')
@@ -42,6 +42,9 @@ const parseBlocks = (text) => {
     const code = parseCodeBlock(lines, i)
     if (code) { blocks.push(code.block); i = code.nextIndex; continue }
 
+    const indentedCode = parseIndentedCodeBlock(lines, i)
+    if (indentedCode) { blocks.push(indentedCode.block); i = indentedCode.nextIndex; continue }
+
     const math = parseMath(lines, i)
     if (math) { blocks.push(math.block); i = math.nextIndex; continue }
 
@@ -59,11 +62,22 @@ const parseBlocks = (text) => {
 
     const pLines = [line]
     i++
-    while (i < lines.length && !isBlockStart(lines, i, parseBlocks)) {
+    while (i < lines.length) {
+      const setextLevel = parseSetextUnderline(lines[i])
+      if (setextLevel) {
+        i++
+        const headingText = pLines.map((l) => l.trim()).join('\n')
+        blocks.push({ type: 'header', level: setextLevel, children: parseInline(headingText) })
+        pLines.length = 0
+        break
+      }
+      if (isBlockStart(lines, i, parseBlocks)) break
       pLines.push(lines[i])
       i++
     }
-    blocks.push({ type: 'paragraph', children: parseInline(pLines.join('\n')) })
+    if (pLines.length > 0) {
+      blocks.push({ type: 'paragraph', children: parseInline(pLines.join('\n')) })
+    }
   }
 
   return blocks

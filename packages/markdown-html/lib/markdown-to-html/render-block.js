@@ -34,7 +34,7 @@ const renderBlock = (node, options = {}) => {
       }
       const highlighted = highlightCode(node.value, lang, options.tokenizers)
       const langClass = lang ? ` class="language-${escapeHtml(lang)}"` : ''
-      return `<pre><code${langClass}>${highlighted}</code></pre>\n`
+      return `<pre><code${langClass}>${highlighted}\n</code></pre>\n`
     }
     case 'blockquote': {
       const { html, head } = renderBlocks(node.children, options)

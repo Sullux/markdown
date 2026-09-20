@@ -40,4 +40,43 @@ const parseCodeBlock = (lines, startIndex) => {
   }
 }
 
-module.exports = { parseCodeFenceHeader, parseCodeBlock }
+const parseIndentedCodeBlock = (lines, startIndex) => {
+  const first = lines[startIndex]
+  if (!first || (!first.startsWith('    ') && !first.startsWith('\t'))) return null
+
+  const codeLines = []
+  let i = startIndex
+  while (i < lines.length) {
+    const line = lines[i]
+    if (!line.trim()) {
+      let peek = i + 1
+      while (peek < lines.length && !lines[peek].trim()) peek++
+      if (peek < lines.length && (lines[peek].startsWith('    ') || lines[peek].startsWith('\t'))) {
+        codeLines.push('')
+        i++
+        continue
+      }
+      break
+    }
+    if (line.startsWith('    ')) {
+      codeLines.push(line.slice(4))
+      i++
+    } else if (line.startsWith('\t')) {
+      codeLines.push(line.slice(1))
+      i++
+    } else {
+      break
+    }
+  }
+
+  return {
+    block: {
+      type: 'codeBlock',
+      language: null,
+      value: codeLines.join('\n'),
+    },
+    nextIndex: i,
+  }
+}
+
+module.exports = { parseCodeFenceHeader, parseCodeBlock, parseIndentedCodeBlock }

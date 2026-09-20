@@ -17,7 +17,7 @@ test('markdownToHtml - Fenced code blocks with language highlighting', () => {
   const { html } = markdownToHtml(md)
   assert.strictEqual(
     html,
-    '<pre><code class="language-js"><span class="hl-kw">const</span> <span class="hl-id">x</span> <span class="hl-punc">=</span> <span class="hl-str">&quot;&lt;hello&gt;&quot;</span><span class="hl-punc">;</span></code></pre>\n'
+    '<pre><code class="language-js"><span class="hl-kw">const</span> <span class="hl-id">x</span> <span class="hl-punc">=</span> <span class="hl-str">&quot;&lt;hello&gt;&quot;</span><span class="hl-punc">;</span>\n</code></pre>\n'
   )
 })
 

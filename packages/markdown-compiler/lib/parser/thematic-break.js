@@ -1,7 +1,8 @@
 const parseThematicBreak = (line) => {
-  const trimmed = line.trim()
-  if (['---', '***', '___'].includes(trimmed)) return { type: 'hr' }
-  if (/^(\*\s*){3,}$|^(-\s*){3,}$|^(_\s*){3,}$/.test(trimmed)) return { type: 'hr' }
+  if (!line || typeof line !== 'string') return null
+  if (/^ {0,3}([*\-_])[ \t]*(?:\1[ \t]*){2,}$/.test(line)) {
+    return { type: 'hr' }
+  }
   return null
 }
 

@@ -13,4 +13,11 @@ const parseHeader = (line) => {
   }
 }
 
-module.exports = { parseHeader }
+const parseSetextUnderline = (line) => {
+  if (!line || typeof line !== 'string') return null
+  const match = line.match(/^ {0,3}(=+|-+)[ \t]*$/)
+  if (!match) return null
+  return match[1][0] === '=' ? 1 : 2
+}
+
+module.exports = { parseHeader, parseSetextUnderline }
