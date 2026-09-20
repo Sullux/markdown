@@ -7,22 +7,25 @@ The `markdownToHtml` function parses raw Markdown text into a structured AST usi
 ```javascript
 const { markdownToHtml } = require('@sullux/markdown-html')
 
-const html = markdownToHtml(markdown, options)
+const { html, head } = markdownToHtml(markdown, options)
 ```
 
 ### Parameters
 
-* **`markdown`** (`string`): The raw Markdown source text, optionally containing YAML frontmatter.
+* **`markdown`** (`string | Object`): The raw Markdown source text (optionally containing YAML frontmatter) or a pre-parsed AST object.
 * **`options`** (`Object`, optional):
-  * **`options.codeRenderers`** (`Record<string, Function>`): Map of language tags to custom code block renderers `(node, options) => string`.
-  * **`options.mathBlockRenderer`** (`Function`): Custom renderer for display math blocks `(node, options) => string`. Defaults to `options.codeRenderers.math` if provided, otherwise semantic `<div class="math-display">`.
+  * **`options.codeRenderers`** (`Record<string, Function>`): Map of language tags to custom code block renderers `(node, options) => string | { html, head }`.
+  * **`options.mathBlockRenderer`** (`Function`): Custom renderer for display math blocks `(node, options) => string | { html, head }`. Defaults to `options.codeRenderers.math` if provided, otherwise semantic `<div class="math-display">` with KaTeX head assets.
   * **`options.inlineMathRenderer`** (`Function`): Custom renderer for inline math `(token, options) => string`. Defaults to semantic `<span class="math-inline">`.
   * **`options.tokenizers`** (`Record<string, Function>`): Map of language names to custom syntax tokenizers `(code) => string`.
   * **`options.slugify`** (`Function`): Custom heading slug generator `(rawText, usedSlugsSet) => string`.
 
 ### Returns
 
-* **`string`**: The rendered semantic HTML document.
+* **`Object`**: A component descriptor containing:
+  * **`html`** (`string`): The rendered semantic HTML document.
+  * **`head`** (`string[]`): Deduplicated array of required `<head>` tags (such as KaTeX styles/scripts or Mermaid modules).
+  * **`toString()`**: Method returning `html` for automatic string coercion in template literals (`${markdownToHtml(md)}`).
 
 ---
 
@@ -124,4 +127,22 @@ Rendered HTML:
 $$</div>
 ```
 
-Custom math renderers can be supplied via `options.mathBlockRenderer`, `options.inlineMathRenderer`, or `options.codeRenderers.math`.
+Custom math renderers can be supplied via `options.mathBlockRenderer`, `options.inlineMathRenderer`, or `options.codeRenderers.math`. When math is present, `head` automatically includes the KaTeX stylesheet and auto-render script.
+
+### 9. Mermaid Diagram Rendering
+Fenced code blocks with `language: 'mermaid'` render to semantic `<pre class="mermaid">` elements:
+
+```markdown
+```mermaid
+graph TD;
+  A-->B;
+```
+```
+
+Rendered HTML:
+```html
+<pre class="mermaid">graph TD;
+  A--&gt;B;</pre>
+```
+
+When Mermaid blocks are present, `head` automatically includes the Mermaid ESM bundle and registers a listener for `'@sullux/markdown:theme'` to respond to light/dark theme changes dynamically. Custom diagram renderers can override this via `options.codeRenderers.mermaid`.

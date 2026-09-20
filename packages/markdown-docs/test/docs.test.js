@@ -129,3 +129,57 @@ test('markdown-docs - generateSite compiles README.md to index.html without READ
 
   fs.rmSync(tmpDir, { recursive: true, force: true })
 })
+
+test('markdown-docs - generateSite detects math and injects KaTeX assets on math pages', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'md-docs-math-test-'))
+  const inputDir = path.join(tmpDir, 'docs')
+  const outputDir = path.join(tmpDir, 'dist')
+
+  fs.mkdirSync(inputDir, { recursive: true })
+  fs.writeFileSync(path.join(inputDir, 'SUMMARY.md'), '* [Math Page](math.md)\n* [Plain Page](plain.md)\n* [Code Math](code-math.md)')
+  fs.writeFileSync(path.join(inputDir, 'math.md'), '# Math Page\n\nComplexity is $O(1)$ and:\n\n$$\nf(x) = x^2\n$$')
+  fs.writeFileSync(path.join(inputDir, 'code-math.md'), '# Code Math Page\n\n```math\ng(x) = \\sqrt{x}\n```')
+  fs.writeFileSync(path.join(inputDir, 'plain.md'), '# Plain Page\n\nNo math formulas here.')
+
+  generateSite({ input: inputDir, output: outputDir })
+
+  const mathHtml = fs.readFileSync(path.join(outputDir, 'math.html'), 'utf8')
+  assert.match(mathHtml, /katex\.min\.css/)
+  assert.match(mathHtml, /auto-render\.min\.js/)
+  assert.match(mathHtml, /class="math-inline" data-latex="O\(1\)"/)
+
+  const codeMathHtml = fs.readFileSync(path.join(outputDir, 'code-math.html'), 'utf8')
+  assert.match(codeMathHtml, /katex\.min\.css/)
+  assert.match(codeMathHtml, /auto-render\.min\.js/)
+  assert.match(codeMathHtml, /class="math-display" data-latex="g\(x\) = \\sqrt\{x\}"/)
+
+  const plainHtml = fs.readFileSync(path.join(outputDir, 'plain.html'), 'utf8')
+  assert.doesNotMatch(plainHtml, /katex\.min\.css/)
+  assert.doesNotMatch(plainHtml, /auto-render\.min\.js/)
+
+  fs.rmSync(tmpDir, { recursive: true, force: true })
+})
+
+test('markdown-docs - generateSite injects Mermaid assets on diagram pages with theme event dispatch', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'md-docs-mermaid-test-'))
+  const inputDir = path.join(tmpDir, 'docs')
+  const outputDir = path.join(tmpDir, 'dist')
+
+  fs.mkdirSync(inputDir, { recursive: true })
+  fs.writeFileSync(path.join(inputDir, 'SUMMARY.md'), '* [Diagrams](diagrams.md)\n* [Notes](notes.md)')
+  fs.writeFileSync(path.join(inputDir, 'diagrams.md'), '# Diagrams\n\n```mermaid\ngraph TD;\n  A-->B;\n```')
+  fs.writeFileSync(path.join(inputDir, 'notes.md'), '# Notes\n\nJust text.')
+
+  generateSite({ input: inputDir, output: outputDir })
+
+  const diagHtml = fs.readFileSync(path.join(outputDir, 'diagrams.html'), 'utf8')
+  assert.match(diagHtml, /mermaid\.esm\.min\.mjs/)
+  assert.match(diagHtml, /@sullux\/markdown:theme/)
+  assert.match(diagHtml, /<pre class="mermaid">graph TD;\n  A--&gt;B;<\/pre>/)
+  assert.match(diagHtml, /dispatchEvent\(new CustomEvent\('@sullux\/markdown:theme'/)
+
+  const notesHtml = fs.readFileSync(path.join(outputDir, 'notes.html'), 'utf8')
+  assert.doesNotMatch(notesHtml, /mermaid\.esm\.min\.mjs/)
+
+  fs.rmSync(tmpDir, { recursive: true, force: true })
+})

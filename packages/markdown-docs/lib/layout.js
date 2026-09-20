@@ -24,16 +24,17 @@ const renderFavicon = (f) => f ? `<link rel="icon" href="${f}" />` : `<link rel=
 
 const renderHeaderLinks = (links = []) => links?.length ? `<div class="header-links">` + links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener" class="header-link">${l.title} ↗</a>`).join('') + `</div>` : ''
 
-const renderPageLayout = ({ title, siteTitle, navTree, toc, contentHtml, currentHref, logo, favicon, links, theme }) => {
+const renderPageLayout = ({ title, siteTitle, navTree, toc, contentHtml, currentHref, logo, favicon, links, theme, head = [] }) => {
   const sidebarNav = renderNavTree(navTree, currentHref)
   return `<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>${renderFavicon(favicon)}<style>${getCss(theme)}</style>
-  <script>
+${head?.length ? head.join('\n') + '\n' : ''}  <script>
     function setThemeMode(m) {
       try { localStorage.setItem('sullux-theme-mode', m); } catch(e) {}
       if (m === 'light' || m === 'dark') document.documentElement.setAttribute('data-theme', m); else document.documentElement.removeAttribute('data-theme');
       document.querySelectorAll('.theme-opt').forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-mode') === m); });
+      try { window.dispatchEvent(new CustomEvent('@sullux/markdown:theme', { detail: { mode: m } })); } catch(e) {}
     }
     function toggleDrawer(id) {
       var d = document.getElementById(id), b = document.getElementById('drawer-backdrop'), open = d?.classList.contains('open');

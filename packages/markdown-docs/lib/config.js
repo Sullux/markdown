@@ -62,8 +62,9 @@ const normalizeConfig = (opts = {}) => {
   const favicon = fileConfig.favicon || opts.favicon || ''
   const links = fileConfig.links || opts.links || []
   const theme = { ...(fileConfig.theme || {}), ...(opts.theme || {}) }
+  const math = opts.math !== undefined ? opts.math : fileConfig.math
 
-  return { input, output, title, baseUrl, logo, favicon, links, theme }
+  return { input, output, title, baseUrl, logo, favicon, links, theme, math }
 }
 
 module.exports = { parseArgs, normalizeConfig, loadFileConfig }

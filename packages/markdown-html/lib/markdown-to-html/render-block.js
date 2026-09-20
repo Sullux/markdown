@@ -3,6 +3,9 @@ const { slugify } = require('./slugify')
 const { renderInline } = require('./render-inline')
 const { highlightCode } = require('./highlight')
 const { renderList } = require('./render-list')
+const { KATEX_HEAD, MERMAID_HEAD } = require('./assets')
+
+const hasInlineMath = (children) => Boolean(children?.some((c) => c.type === 'inlineMath'))
 
 const renderBlock = (node, options = {}) => {
   if (!node) return ''
@@ -12,76 +15,77 @@ const renderBlock = (node, options = {}) => {
       const text = renderInline(node.children, options)
       const rawText = node.children ? node.children.map((c) => (c.type === 'text' ? c.value : '')).join('') : ''
       const slug = (options.slugify || slugify)(rawText, options.usedSlugs)
-      return `<h${node.level} id="${slug}">${text}</h${node.level}>\n`
+      const html = `<h${node.level} id="${slug}">${text}</h${node.level}>\n`
+      return hasInlineMath(node.children) ? { html, head: KATEX_HEAD } : html
     }
     case 'paragraph': {
-      return `<p>${renderInline(node.children, options)}</p>\n`
+      const html = `<p>${renderInline(node.children, options)}</p>\n`
+      return hasInlineMath(node.children) ? { html, head: KATEX_HEAD } : html
     }
     case 'codeBlock': {
       const lang = node.language || ''
-      if (options.codeRenderers && lang && options.codeRenderers[lang]) {
-        return options.codeRenderers[lang](node, options)
+      if (options.codeRenderers?.[lang]) return options.codeRenderers[lang](node, options)
+      if (lang === 'math') {
+        if (options.mathBlockRenderer) return options.mathBlockRenderer(node, options)
+        return { html: `<div class="math-display" data-latex="${escapeHtml(node.value)}">$$\n${escapeHtml(node.value)}\n$$</div>\n`, head: KATEX_HEAD }
+      }
+      if (lang === 'mermaid') {
+        return { html: `<pre class="mermaid">${escapeHtml(node.value)}</pre>\n`, head: MERMAID_HEAD }
       }
       const highlighted = highlightCode(node.value, lang, options.tokenizers)
       const langClass = lang ? ` class="language-${escapeHtml(lang)}"` : ''
       return `<pre><code${langClass}>${highlighted}</code></pre>\n`
     }
     case 'blockquote': {
-      const innerHtml = node.children ? node.children.map((child) => renderBlock(child, options)).join('') : ''
-      return `<blockquote>\n${innerHtml}</blockquote>\n`
+      const { html, head } = renderBlocks(node.children, options)
+      return { html: `<blockquote>\n${html}</blockquote>\n`, head }
     }
     case 'callout': {
       const style = node.style || 'note'
       const title = style.charAt(0).toUpperCase() + style.slice(1)
-      const innerHtml = node.children ? node.children.map((child) => renderBlock(child, options)).join('') : ''
-      return `<div class="callout callout-${style}">\n<div class="callout-title">${title}</div>\n${innerHtml}</div>\n`
+      const { html, head } = renderBlocks(node.children, options)
+      return { html: `<div class="callout callout-${style}">\n<div class="callout-title">${title}</div>\n${html}</div>\n`, head }
     }
     case 'bulletList':
     case 'orderedList': {
-      return renderList(node, options, renderBlock)
+      return renderList(node, options, renderBlock, hasInlineMath, KATEX_HEAD)
     }
     case 'table': {
       const alignments = node.alignments || []
       const rows = node.rows || []
       if (rows.length === 0) return ''
-
-      const headerRow = rows[0]
-      const bodyRows = rows.slice(1)
-
       const renderRow = (row, isHeader) => {
-        const cellTag = isHeader ? 'th' : 'td'
-        const cells = row
-          .map((cell, colIdx) => {
-            const align = alignments[colIdx] || 'default'
-            const alignAttr = align !== 'default' ? ` align="${align}"` : ''
-            return `<${cellTag}${alignAttr}>${renderInline(cell, options)}</${cellTag}>`
-          })
-          .join('')
+        const tag = isHeader ? 'th' : 'td'
+        const cells = row.map((cell, i) => {
+          const align = alignments[i] || 'default'
+          return `<${tag}${align !== 'default' ? ` align="${align}"` : ''}>${renderInline(cell, options)}</${tag}>`
+        }).join('')
         return `<tr>${cells}</tr>\n`
       }
-
-      let tableHtml = '<table>\n<thead>\n' + renderRow(headerRow, true) + '</thead>\n'
-      if (bodyRows.length > 0) {
-        tableHtml += '<tbody>\n' + bodyRows.map((r) => renderRow(r, false)).join('') + '</tbody>\n'
-      }
-      tableHtml += '</table>\n'
-      return tableHtml
+      const tableBody = rows.slice(1).length ? `<tbody>\n${rows.slice(1).map((r) => renderRow(r, false)).join('')}</tbody>\n` : ''
+      const tableHtml = `<table>\n<thead>\n${renderRow(rows[0], true)}</thead>\n${tableBody}</table>\n`
+      const hasMath = rows.some((row) => row.some((cell) => hasInlineMath(cell)))
+      return hasMath ? { html: tableHtml, head: KATEX_HEAD } : tableHtml
     }
-    case 'hr': {
-      return '<hr />\n'
-    }
-    case 'html': {
-      return `${node.value}\n`
-    }
+    case 'hr': return '<hr />\n'
+    case 'html': return `${node.value}\n`
     case 'mathBlock': {
       const mathRenderer = options.mathBlockRenderer || options.codeRenderers?.math
       if (mathRenderer) return mathRenderer(node, options)
-      return `<div class="math-display" data-latex="${escapeHtml(node.value)}">$$\n${escapeHtml(node.value)}\n$$</div>\n`
+      return { html: `<div class="math-display" data-latex="${escapeHtml(node.value)}">$$\n${escapeHtml(node.value)}\n$$</div>\n`, head: KATEX_HEAD }
     }
-    default: {
-      return ''
-    }
+    default: return ''
   }
 }
 
-module.exports = { renderBlock }
+const renderBlocks = (blocks, options) => (blocks || []).reduce(
+  (acc, block) => {
+    const res = renderBlock(block, options)
+    const html = typeof res === 'string' ? res : res?.html || ''
+    const head = typeof res === 'object' && Array.isArray(res?.head) ? res.head : []
+    return { html: acc.html + html, head: acc.head.concat(head) }
+  },
+  { html: '', head: [] }
+)
+
+module.exports = { renderBlock, renderBlocks }

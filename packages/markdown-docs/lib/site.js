@@ -53,7 +53,7 @@ const generateSite = (options = {}) => {
     const rawMd = fs.readFileSync(file.fullPath, 'utf8')
     const ast = parse(rawMd)
     const toc = extractToc(ast)
-    const rawHtml = markdownToHtml(ast)
+    const { html: rawHtml, head: docHead } = markdownToHtml(ast)
     const contentHtml = rewriteMarkdownLinks(rawHtml)
     const relHtmlPath = normalizeHtmlPath(file.relPath)
     const outHtmlPath = path.join(config.output, relHtmlPath)
@@ -76,6 +76,7 @@ const generateSite = (options = {}) => {
       favicon: config.favicon,
       links: config.links,
       theme: config.theme,
+      head: docHead,
     })
 
     fs.writeFileSync(outHtmlPath, fullHtml, 'utf8')

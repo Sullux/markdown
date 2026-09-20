@@ -22,7 +22,7 @@ A code block renderer is a pure function:
 
 ### Returns
 
-* **`string`**: HTML string to replace the entire `<pre><code>` block.
+* **`string | Object`**: Either an HTML string to replace the block, or a component object `{ html: string, head: string[] }` providing markup and head tags (scripts, stylesheets) to inject into the document.
 
 ---
 
