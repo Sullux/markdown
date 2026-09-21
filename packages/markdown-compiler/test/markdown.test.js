@@ -321,3 +321,65 @@ test('math parsing - avoids false positives on currency and escaped symbols', ()
   const hasEscapedMath = escapedAst.blocks[0].children.some((c) => c.type === 'inlineMath')
   assert.strictEqual(hasEscapedMath, false)
 })
+
+test('stringify - thematic breaks, inline html, titles, code spans, callout titles, and loose lists', () => {
+  // 1. Thematic break
+  const hrAst = { blocks: [{ type: 'hr' }] }
+  assert.strictEqual(stringify(hrAst).trim(), '---')
+
+  // 2. Inline HTML without extra newlines
+  const inlineHtmlAst = parse('Hello <b>world</b>!')
+  assert.strictEqual(stringify(inlineHtmlAst).trim(), 'Hello <b>world</b>!')
+
+  // 3. Link and Image titles
+  const linkAst = parse('[example](https://example.com "title")')
+  assert.strictEqual(stringify(linkAst).trim(), '[example](https://example.com "title")')
+  const imgAst = parse('![alt](img.png "img title")')
+  assert.strictEqual(stringify(imgAst).trim(), '![alt](img.png "img title")')
+
+  // 4. Code spans containing backticks
+  const codeSpanAst = parse('`` `foo` ``')
+  assert.strictEqual(stringify(codeSpanAst).trim(), '`` `foo` ``')
+
+  // 5. Code block containing triple backticks
+  const codeBlockNode = { type: 'codeBlock', language: 'markdown', value: '```js\nconst x = 1\n```' }
+  const codeBlockStr = stringify({ blocks: [codeBlockNode] }).trim()
+  assert.ok(codeBlockStr.startsWith('````markdown'))
+  assert.ok(codeBlockStr.endsWith('````'))
+
+  // 6. Callout with title
+  const calloutNode = Node.callout('note', 'Custom Title', [Node.paragraph([Node.text('Body text.')])])
+  assert.ok(stringify({ blocks: [calloutNode] }).includes('> [!NOTE] Custom Title'))
+
+  // 7. Loose list formatting
+  const looseListAst = {
+    blocks: [
+      Node.bulletList([
+        Node.listItem([Node.paragraph([Node.text('item 1')])]),
+        Node.listItem([Node.paragraph([Node.text('item 2')])]),
+      ], false),
+    ],
+  }
+  const looseStr = stringify(looseListAst).trim()
+  assert.strictEqual(looseStr, '* item 1\n\n* item 2')
+
+  // 8. Multi-paragraph list item
+  const multiParaItem = {
+    blocks: [
+      Node.bulletList([
+        Node.listItem([
+          Node.paragraph([Node.text('first para')]),
+          Node.paragraph([Node.text('second para')]),
+        ]),
+      ], false),
+    ],
+  }
+  const multiStr = stringify(multiParaItem).trim()
+  assert.strictEqual(multiStr, '* first para\n\n  second para')
+
+  // 9. Checklist round-trip
+  const checklistMd = '* [x] task done\n* [ ] task todo'
+  const checklistAst = parse(checklistMd)
+  assert.strictEqual(stringify(checklistAst).trim(), checklistMd)
+})
+
