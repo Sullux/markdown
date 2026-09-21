@@ -16,10 +16,12 @@ const { Node } = require('@sullux/markdown-compiler')
 * **`Node.bulletList(children, tight)`**: Creates an unordered bullet list container node.
 * **`Node.orderedList(children, start, tight)`**: Creates a numbered ordered list container node (`start`: default 1).
 * **`Node.codeBlock(language, value)`**: Creates a fenced code block node.
+* **`Node.mathBlock(value)`**: Creates a LaTeX display math block node.
 * **`Node.blockquote(children)`**: Creates a blockquote node.
 * **`Node.callout(style, title, children)`**: Creates a callout box node (e.g. `'note'`, `'warning'`).
 * **`Node.table(alignments, rows)`**: Creates an aligned table node.
-* **`Node.hr()`**: Creates a horizontal rule node.
+* **`Node.html(value)`**: Creates a raw block-level HTML node.
+* **`Node.hr()`**: Creates a horizontal rule / thematic break node.
 
 ## Inline Factories
 
@@ -32,6 +34,8 @@ const { Node } = require('@sullux/markdown-compiler')
 * **`Node.wikilink(target, display)`**: Creates a wikilink node (`[[target|display]]`).
 * **`Node.image(url, alt)`**: Creates an image node.
 * **`Node.checkbox(checked)`**: Creates a task list checkbox node.
+* **`Node.inlineMath(value)`**: Creates an inline LaTeX math node (`$value$`).
+* **`Node.html(value)`**: Creates a raw inline HTML node.
 * **`Node.br()`**: Creates a line-break node.
 
 ## Example: Composing an AST
@@ -49,9 +53,9 @@ const doc = {
       Node.text(' instructions:'),
     ]),
     Node.bulletList([
-      [Node.text('Review architecture document')],
-      [Node.text('Execute test suite')],
-      [Node.text('Deploy service')],
+      Node.listItem([Node.paragraph([Node.text('Review architecture document')])]),
+      Node.listItem([Node.paragraph([Node.text('Execute test suite')])]),
+      Node.listItem([Node.paragraph([Node.text('Deploy service')])]),
     ]),
   ],
 }

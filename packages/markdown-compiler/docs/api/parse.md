@@ -59,8 +59,8 @@ console.log(images[2].width)                  // '400px'
 console.log(images[3].width, images[3].height) // '250px', '100px'
 ```
 
-### 3. Nested Lists & Sequence Continuity
-Indented sub-lists (both bullet and ordered) are retained within their parent list block, normalizing relative `depth` and preserving sequence continuation numbers:
+### 3. Nested Lists & Container Hierarchy
+Hierarchical lists strictly follow CommonMark container block rules. A list contains `listItem` nodes in `children`, and nested sub-lists reside inside the parent `listItem.children`:
 
 ```javascript
 const doc = parse(`
@@ -72,9 +72,12 @@ const doc = parse(`
 `)
 
 const list = doc.blocks[0]
-console.log(list.items.length)     // 5 items in one list block
-console.log(list.items[2].depth)    // 1 (sub-item)
-console.log(list.items[4].order)    // 3 (continues sequence 3)
+console.log(list.type)             // 'orderedList'
+console.log(list.children.length)  // 3 list items
+
+const item2 = list.children[1]
+console.log(item2.children[0].type) // 'paragraph' (Build binary)
+console.log(item2.children[1].type) // 'bulletList' (sub-list with 2 items)
 ```
 
 ### 4. Code Block Metadata

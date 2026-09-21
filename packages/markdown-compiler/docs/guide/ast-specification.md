@@ -18,7 +18,7 @@ interface Document {
 Block nodes define structural regions of the document. Block structure strictly adheres to the [CommonMark Specification (v0.31.2)](https://spec.commonmark.org/0.31.2/) for container blocks and nesting.
 
 ### `header`
-Represents section headings (`#` through `######`).
+Represents section headings (`#` through `######`) or Setext headings (`===`, `---`).
 ```javascript
 {
   type: 'header',
@@ -67,13 +67,22 @@ A container block representing an individual list entry (§5.2). It contains an 
 ```
 
 ### `codeBlock`
-Represents fenced code blocks (```` ``` ```` or `~~~`).
+Represents fenced code blocks (```` ``` ```` or `~~~`) or indented code blocks (4 spaces / 1 tab).
 ```javascript
 {
   type: 'codeBlock',
   language: 'javascript',
   languageMetadata: 'title="server.js"',
   value: 'const port = 8080;'
+}
+```
+
+### `mathBlock`
+Represents display math blocks enclosed by `$$...$$` or ```` ```math ````.
+```javascript
+{
+  type: 'mathBlock',
+  value: '\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}'
 }
 ```
 
@@ -92,6 +101,7 @@ Represents alert and callout banners (`> [!NOTE]` or GitBook `{% hint %}`).
 {
   type: 'callout',
   style: 'note', // 'note', 'warning', 'tip', 'important', 'info', etc.
+  title: 'Custom Title', // optional title
   children: [ /* BlockNode[] */ ]
 }
 ```
@@ -109,8 +119,17 @@ Represents GFM aligned tables.
 }
 ```
 
+### `html`
+Represents raw block-level HTML elements (CommonMark Types 1–7).
+```javascript
+{
+  type: 'html',
+  value: '<div class="alert">\n  <p>Raw HTML</p>\n</div>'
+}
+```
+
 ### `hr`
-Represents a horizontal rule (`---`, `***`, `___`).
+Represents a horizontal rule / thematic break (`---`, `***`, `___`).
 ```javascript
 {
   type: 'hr'
@@ -126,8 +145,10 @@ Inline nodes represent formatting, text, and media inside block elements:
 * **`italic`**: `{ type: 'italic', children: InlineNode[] }`
 * **`strikethrough`**: `{ type: 'strikethrough', children: InlineNode[] }`
 * **`code`**: `{ type: 'code', value: string }`
-* **`link`**: `{ type: 'link', url: string, children: InlineNode[] }`
+* **`link`**: `{ type: 'link', url: string, title?: string, children: InlineNode[] }`
 * **`wikilink`**: `{ type: 'wikilink', target: string, display: string }`
-* **`image`**: `{ type: 'image', url: string, alt: string, width?: string, height?: string }`
+* **`image`**: `{ type: 'image', url: string, alt: string, title?: string, width?: string, height?: string }`
 * **`checkbox`**: `{ type: 'checkbox', checked: boolean }`
+* **`html`**: `{ type: 'html', value: string }`
+* **`inlineMath`**: `{ type: 'inlineMath', value: string }`
 * **`br`**: `{ type: 'br' }`
