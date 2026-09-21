@@ -83,20 +83,23 @@ Output:
 | Throughput |  PASS  |  27 tok/s |
 ```
 
-### 3. Nested List Preservation
-Lists with indented children preserve indentation and marker styles (`*`, `-`, or numbered markers):
+### 3. Nested List & Container Formatting
+Hierarchical lists adhering to CommonMark container structures preserve nesting depth, numbering, task checkboxes, and tight vs. loose blank line spacing:
 
 ```javascript
 const { stringify, Node } = require('@sullux/markdown-compiler')
 
-const list = {
-  type: 'orderedList',
-  items: [
-    Object.assign([Node.text('Setup')], { indent: 0, order: 1, listType: 'ordered' }),
-    Object.assign([Node.text('Sub-step A')], { indent: 2, marker: '*', listType: 'bullet' }),
-    Object.assign([Node.text('Deploy')], { indent: 0, order: 2, listType: 'ordered' }),
-  ],
-}
+const list = Node.orderedList([
+  Node.listItem([Node.paragraph([Node.text('Setup environment')])]),
+  Node.listItem([
+    Node.paragraph([Node.text('Build binary')]),
+    Node.bulletList([
+      Node.listItem([Node.paragraph([Node.text('Check drivers')])], true),
+      Node.listItem([Node.paragraph([Node.text('Verify tools')])], false),
+    ]),
+  ]),
+  Node.listItem([Node.paragraph([Node.text('Launch service')])]),
+])
 
 console.log(stringify(list))
 ```
@@ -104,7 +107,9 @@ console.log(stringify(list))
 Output:
 
 ```markdown
-1. Setup
-  * Sub-step A
-2. Deploy
+1. Setup environment
+2. Build binary
+  * [x] Check drivers
+  * [ ] Verify tools
+3. Launch service
 ```
