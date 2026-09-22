@@ -1,0 +1,44 @@
+{
+  "name": "@sullux/markdown-slides",
+  "version": "2.0.0",
+  "description": "A zero-dependency, local-first presentation slide deck generator compiling Markdown into responsive, modular HTML slide presentations.",
+  "main": "./index.js",
+  "bin": {
+    "markdown-slides": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "build": "node build.js",
+    "deploy": "./deploy.sh"
+  },
+  "author": "Charles Sullivan <charles@sullux.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sullux/markdown.git",
+    "directory": "packages/markdown-slides"
+  },
+  "bugs": {
+    "url": "https://github.com/Sullux/markdown/issues"
+  },
+  "homepage": "https://github.com/Sullux/markdown/tree/main/packages/markdown-slides#readme",
+  "keywords": [
+    "markdown",
+    "slides",
+    "presentation",
+    "pitch-deck",
+    "slide-deck",
+    "compiler"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@sullux/markdown-compiler": "^2.0.1",
+    "@sullux/markdown-html": "^2.0.2"
+  }
+}

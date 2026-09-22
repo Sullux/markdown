@@ -1,0 +1,19 @@
+title: "Markdown Slides"
+links:
+  - title: "Website"
+    url: "https://sullux.com/projects/markdown/markdown-slides/"
+  - title: "GitHub"
+    url: "https://github.com/Sullux/markdown/tree/main/packages/markdown-slides"
+  - title: "NPM"
+    url: "https://www.npmjs.com/package/@sullux/markdown-slides"
+theme:
+  light:
+    bg: "#ffffff"
+    accent: "#6040ff"
+    codeBg: "#f8fafc"
+  dark:
+    bg: "#121316"
+    accent: "#6040ff"
+    codeBg: "#0a0b0e"
+logo: logo.svg
+favicon: logo.svg
