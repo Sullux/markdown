@@ -5,6 +5,7 @@ const { split } = require('./split')
 const { media } = require('./media')
 const { quote } = require('./quote')
 const { runTemplates, resolveTemplate } = require('./pipeline')
+const { listTemplates, formatTemplateList } = require('./list')
 
 const BUILT_IN_TEMPLATES = {
   'Title/Content': titleContent,
@@ -44,4 +45,6 @@ module.exports = {
   quote,
   runTemplates,
   resolveTemplate,
+  listTemplates,
+  formatTemplateList,
 }

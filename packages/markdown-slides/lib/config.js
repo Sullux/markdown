@@ -10,6 +10,8 @@ const parseArgs = (args) => {
       options.title = args[++i]
     } else if (arg === '-c' || arg === '--config') {
       options.config = args[++i]
+    } else if (arg === '--templates' || arg === '-l' || arg === '--list-templates') {
+      options.templates = true
     } else if (arg === '-h' || arg === '--help') {
       options.help = true
     } else if (!arg.startsWith('-') && !options.input) {

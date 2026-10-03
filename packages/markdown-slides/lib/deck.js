@@ -1,9 +1,16 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const { markdownToHtml } = require('@sullux/markdown-html')
 const { loadDeck } = require('./loader')
 const { runTemplates } = require('./templates')
 const { renderShell } = require('./shell')
 const { copyAssets } = require('./assets')
+
+const parseNotesHtml = (frontmatter = {}) => {
+  const notes = frontmatter.notes || frontmatter.note || ''
+  const text = Array.isArray(notes) ? notes.join('\n\n') : String(notes)
+  return text.trim() ? markdownToHtml(text).html : ''
+}
 
 const compileSlide = (slide, deck) => {
   const context = {
@@ -27,6 +34,7 @@ const compileSlide = (slide, deck) => {
     ...slide,
     html: res.html,
     head: res.head || [],
+    notesHtml: parseNotesHtml(slide.frontmatter),
   }
 }
 

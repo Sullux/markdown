@@ -277,6 +277,84 @@ html, body {
   z-index: 10;
 }
 
+/* Steps & Transitions */
+.slide .step {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.slide .step.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Speaker Notes */
+.speaker-notes {
+  display: none;
+}
+
+.notes-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: var(--slide-bg);
+  border-top: 2px solid var(--accent);
+  padding: 1rem 2rem;
+  color: var(--text-main);
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+}
+
+body.show-notes .notes-drawer {
+  display: flex;
+}
+
+body.show-notes .deck-viewport {
+  height: calc(100vh - 200px);
+}
+
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.notes-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.notes-close-btn:hover {
+  color: var(--text-main);
+}
+
+.notes-content {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.notes-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 @media print {
   html, body {
     width: auto;
@@ -312,7 +390,12 @@ html, body {
     height: 100vh;
     padding: 2rem;
   }
-  .deck-controls, .deck-progress {
+  .deck-controls, .deck-progress, .notes-drawer {
     display: none !important;
+  }
+  .slide .step {
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
   }
 }

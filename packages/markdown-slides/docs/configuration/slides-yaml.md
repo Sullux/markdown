@@ -47,3 +47,28 @@ slides:
 | `theme` | `string` | `"dark"` | Active theme palette (`"dark"` or `"light"`). |
 | `template` | `string \| Array` | `"Title/Content"` | Default template stack applied to all slides unless overridden. |
 | `slides` | `Array` | `[]` | Ordered list of slide files or sub-deck folders. |
+
+## Slide Frontmatter
+
+Individual Markdown slide files can configure per-slide options via YAML frontmatter:
+
+```markdown
+---
+template: Cover
+notes: "Emphasize cold-start latency and zero dependencies."
+steps: true
+---
+# High-Throughput Engine
+
+- Sub-millisecond cold starts
+- Dependency-free binary runtime
+```
+
+### Frontmatter Properties
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `template` | `string \| Array` | Override the template stack for this slide (e.g. `Cover`, `Split`). |
+| `notes` | `string \| Array` | Speaker notes displayed in the presenter drawer when pressing `S`. |
+| `steps` | `boolean` | Set `true` to auto-step through list bullets or column blocks sequentially. |
+| `transitions` | `string[]` | Array of CSS selectors to reveal sequentially (e.g. `['#model', '#engine']`). |

@@ -2,6 +2,8 @@
 
 const { parseArgs } = require('../lib/config')
 const { buildDeck } = require('../lib/deck')
+const { loadDeck } = require('../lib/loader')
+const { formatTemplateList } = require('../lib/templates')
 
 const printHelp = () => {
   console.log(`
@@ -12,6 +14,7 @@ Options:
   -o, --output <dir>     Path to output directory (default: <input>/_slides)
   -t, --title <title>    Deck title (overrides title in slides.yaml)
   -c, --config <file>    Path to config file (default: <input>/slides.yaml)
+  --templates, -l        List available slide templates (built-in and custom)
   -h, --help             Show help documentation
 `)
 }
@@ -22,6 +25,14 @@ const main = () => {
 
   if (options.help) {
     printHelp()
+    process.exit(0)
+  }
+
+  if (options.templates) {
+    const registry = options.input
+      ? loadDeck(options.input, options).registry
+      : {}
+    console.log(formatTemplateList(options.input, registry))
     process.exit(0)
   }
 

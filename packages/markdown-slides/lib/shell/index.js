@@ -4,8 +4,22 @@ const { getClientScript } = require('./client')
 
 const THEME_CSS = fs.readFileSync(path.join(__dirname, 'theme.css'), 'utf8')
 
-const renderSlideSection = (slide, index) =>
-  `        <section id="${slide.id}" class="slide${index === 0 ? ' active' : ''}" data-index="${index}">\n${slide.html}\n        </section>`
+const renderSlideSection = (slide, index) => {
+  const stepsAttr =
+    slide.frontmatter?.steps || slide.frontmatter?.transition === 'step'
+      ? ' data-steps="true"'
+      : ''
+  const transAttr = slide.frontmatter?.transitions
+    ? ` data-transitions='${JSON.stringify(slide.frontmatter.transitions)}'`
+    : ''
+  const notesAside = slide.notesHtml
+    ? `          <aside class="speaker-notes" hidden>${slide.notesHtml}</aside>\n`
+    : ''
+
+  return `        <section id="${slide.id}" class="slide${index === 0 ? ' active' : ''}" data-index="${index}"${stepsAttr}${transAttr}>
+${slide.html}
+${notesAside}        </section>`
+}
 
 const renderShell = ({ title, ratio, theme, slides = [], head = [] }) => {
   const slidesHtml = slides.map((s, i) => renderSlideSection(s, i)).join('\n')
@@ -32,8 +46,16 @@ ${slidesHtml}
       <button class="control-btn btn-prev" aria-label="Previous slide" title="Previous (Left / PageUp)">‹</button>
       <span class="slide-counter">1 / ${total}</span>
       <button class="control-btn btn-next" aria-label="Next slide" title="Next (Right / Space / PageDown)">›</button>
+      <button class="control-btn btn-notes" aria-label="Toggle speaker notes" title="Speaker Notes (S)">📝</button>
       <button class="control-btn btn-fullscreen" aria-label="Fullscreen" title="Fullscreen (F)">⛶</button>
     </nav>
+  </div>
+  <div class="notes-drawer" aria-label="Speaker notes">
+    <div class="notes-header">
+      <span>Speaker Notes (Press S or Esc to close)</span>
+      <button class="notes-close-btn" aria-label="Close notes">✕</button>
+    </div>
+    <div class="notes-content"></div>
   </div>
   <script>
 ${getClientScript()}

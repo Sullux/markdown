@@ -4,8 +4,17 @@ const { renderShell } = require('../lib/shell')
 
 test('shell - renders HTML document with slides, theme, controls, and assets', () => {
   const slides = [
-    { id: 'slide-1', html: '<div class="content">Slide 1</div>' },
-    { id: 'slide-2', html: '<div class="content">Slide 2</div>' },
+    {
+      id: 'slide-1',
+      html: '<div class="content">Slide 1</div>',
+      notesHtml: '<p>Key points to cover.</p>',
+      frontmatter: { steps: true },
+    },
+    {
+      id: 'slide-2',
+      html: '<div class="content">Slide 2</div>',
+      frontmatter: { transitions: ['#col-a', '#col-b'] },
+    },
   ]
   const head = ['<link rel="stylesheet" href="katex.min.css" />']
 
@@ -23,7 +32,11 @@ test('shell - renders HTML document with slides, theme, controls, and assets', (
   assert.ok(html.includes('data-ratio="16:9"'))
   assert.ok(html.includes('href="katex.min.css"'))
   assert.ok(html.includes('id="slide-1" class="slide active"'))
-  assert.ok(html.includes('id="slide-2" class="slide"'))
+  assert.ok(html.includes('data-steps="true"'))
+  assert.ok(html.includes('class="speaker-notes" hidden><p>Key points to cover.</p></aside>'))
+  assert.ok(html.includes('data-transitions=\'["#col-a","#col-b"]\''))
+  assert.ok(html.includes('class="notes-drawer"'))
+  assert.ok(html.includes('class="control-btn btn-notes"'))
   assert.ok(html.includes('1 / 2'))
   assert.ok(html.includes('class="deck-progress"'))
   assert.ok(html.includes('addEventListener(\'keydown\''))

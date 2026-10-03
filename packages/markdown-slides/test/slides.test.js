@@ -5,11 +5,12 @@ const path = require('node:path')
 const { parseArgs, buildDeck } = require('../index')
 
 test('markdown-slides - parseArgs correctly parses CLI options', () => {
-  const args = ['-i', './my-slides', '-o', './dist', '-t', 'Pitch Deck']
+  const args = ['-i', './my-slides', '-o', './dist', '-t', 'Pitch Deck', '--templates']
   const options = parseArgs(args)
   assert.strictEqual(options.input, './my-slides')
   assert.strictEqual(options.output, './dist')
   assert.strictEqual(options.title, 'Pitch Deck')
+  assert.strictEqual(options.templates, true)
 })
 
 test('markdown-slides - buildDeck end-to-end compiles presentation directory', () => {
@@ -38,6 +39,8 @@ slides:
     path.join(tmpDir, '01-cover.md'),
     `---
 template: Cover
+notes: "Welcome everyone. Introduce the architecture agenda."
+steps: true
 ---
 # Sullux Quarterly
 ## Architecture Review
@@ -106,6 +109,8 @@ slides:
     // Slide 1: Cover
     assert.ok(html.includes('class="slide-layout slide-cover"'))
     assert.ok(html.includes('Sullux Quarterly'))
+    assert.ok(html.includes('class="speaker-notes" hidden><p>Welcome everyone.'))
+    assert.ok(html.includes('data-steps="true"'))
 
     // Slide 2: Columns + Math + Code
     assert.ok(html.includes('class="slide-layout slide-header-columns-footer"'))
@@ -121,6 +126,7 @@ slides:
 
     // Asset copying
     assert.ok(fs.existsSync(path.join(outDir, 'logo.svg')))
+    assert.ok(!fs.existsSync(path.join(outDir, 'dist')))
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   }

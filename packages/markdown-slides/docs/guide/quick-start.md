@@ -80,3 +80,28 @@ markdown-slides -i ./my-presentation -o ./dist
 ```
 
 Open `./dist/index.html` in your browser to begin presenting!
+
+## Presentation Controls
+
+The presentation shell supports full keyboard navigation out of the box:
+
+| Action | Shortcut |
+| :--- | :--- |
+| **Next Step / Slide** | `→`, `Space`, `PageDown`, `L` |
+| **Previous Step / Slide** | `←`, `PageUp`, `H` |
+| **First Slide** | `Home` |
+| **Last Slide** | `End` |
+| **Toggle Fullscreen** | `F` |
+| **Toggle Speaker Notes** | `S` (or `Esc` to close) |
+
+## Discovering Templates
+
+To list all available slide templates directly from the CLI:
+
+```bash
+# List built-in templates
+markdown-slides --templates
+
+# List built-in and project-specific custom templates
+markdown-slides -i ./my-presentation --templates
+```
