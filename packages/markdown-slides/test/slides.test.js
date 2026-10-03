@@ -39,7 +39,9 @@ slides:
     path.join(tmpDir, '01-cover.md'),
     `---
 template: Cover
-notes: "Welcome everyone. Introduce the architecture agenda."
+notes: |
+  Welcome everyone.
+  Introduce the architecture agenda.
 steps: true
 ---
 # Sullux Quarterly

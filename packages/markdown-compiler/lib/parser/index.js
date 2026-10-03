@@ -3,14 +3,19 @@ const { parseInline } = require('./inline')
 const { parseBlocks } = require('./parse-blocks')
 
 const parse = (text, options = {}) => {
-  if (text.startsWith('---\n')) {
-    const endIdx = text.indexOf('\n---\n', 4)
-    if (endIdx !== -1) {
-      const yamlContent = text.slice(4, endIdx).split('\n')
-      const hasInvalidLines = yamlContent.some((l) => l.trim() && !l.trim().startsWith('#') && !/^([a-zA-Z0-9_\-]+)\s*:\s*(.*)$/.test(l))
-      const frontmatter = hasInvalidLines ? {} : parseFrontmatter(yamlContent)
-      if (!hasInvalidLines && Object.keys(frontmatter).length > 0) {
-        const bodyText = text.slice(endIdx + 5)
+  if (text.startsWith('---\n') || text.startsWith('---\r\n')) {
+    const startOffset = text.startsWith('---\r\n') ? 5 : 4
+    const endMatch = text.slice(startOffset).match(/\r?\n---\s*(\r?\n|$)/)
+    if (endMatch) {
+      const endIdx = startOffset + endMatch.index
+      const yamlContent = text.slice(startOffset, endIdx)
+      const frontmatter = parseFrontmatter(yamlContent)
+      if (
+        frontmatter &&
+        typeof frontmatter === 'object' &&
+        Object.keys(frontmatter).length > 0
+      ) {
+        const bodyText = text.slice(endIdx + endMatch[0].length)
         const blocks = parseBlocks(bodyText, options)
         return { frontmatter, blocks }
       }

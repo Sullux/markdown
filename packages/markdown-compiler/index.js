@@ -1,5 +1,6 @@
 const { parse } = require('./lib/parser')
 const { stringify } = require('./lib/stringify')
+const { parseYaml } = require('./lib/yaml')
 const Node = require('./lib/nodes')
 
 const toMarkdown = (html) => {
@@ -11,5 +12,6 @@ module.exports = {
   parse,
   stringify,
   toMarkdown,
+  parseYaml,
   Node,
 }
