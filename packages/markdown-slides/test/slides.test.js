@@ -13,7 +13,7 @@ test('markdown-slides - parseArgs correctly parses CLI options', () => {
   assert.strictEqual(options.templates, true)
 })
 
-test('markdown-slides - buildDeck end-to-end compiles presentation directory', () => {
+test('markdown-slides - buildDeck end-to-end compiles presentation directory', async () => {
   const tmpDir = path.join(__dirname, '_fixture_e2e')
   const outDir = path.join(tmpDir, 'dist')
   const subDir = path.join(tmpDir, 'deep-dive')
@@ -93,7 +93,7 @@ slides:
   fs.writeFileSync(path.join(tmpDir, 'logo.svg'), '<svg></svg>')
 
   try {
-    const res = buildDeck({ input: tmpDir, output: outDir })
+    const res = await buildDeck({ input: tmpDir, output: outDir })
 
     assert.strictEqual(res.slideCount, 3)
     assert.strictEqual(res.output, outDir)

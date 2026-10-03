@@ -4,7 +4,7 @@ const { markdownToHtml } = require('@sullux/markdown-html')
 const { loadDeck } = require('./loader')
 const { runTemplates } = require('./templates')
 const { renderShell } = require('./shell')
-const { copyAssets } = require('./assets')
+const { copyAssets, processSlideAssets } = require('./assets')
 
 const parseNotesHtml = (frontmatter = {}) => {
   const notes = frontmatter.notes || frontmatter.note || ''
@@ -12,7 +12,7 @@ const parseNotesHtml = (frontmatter = {}) => {
   return text.trim() ? markdownToHtml(text).html : ''
 }
 
-const compileSlide = (slide, deck) => {
+const compileSlide = async (slide, deck) => {
   const context = {
     slideIndex: slide.index,
     totalSlides: slide.totalSlides,
@@ -38,17 +38,23 @@ const compileSlide = (slide, deck) => {
   }
 }
 
-const buildDeck = (options = {}) => {
+const buildDeck = async (options = {}) => {
   const deck = loadDeck(options.input, options)
   const outputDir = path.resolve(
     options.output || path.join(deck.dir, '_slides'),
   )
 
   if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true })
+    await fs.promises.mkdir(outputDir, { recursive: true })
   }
 
-  const compiledSlides = deck.slides.map((s) => compileSlide(s, deck))
+  // Collect, disambiguate, download/copy, and rewrite image assets
+  await processSlideAssets(deck.slides, outputDir, deck.dir)
+
+  // Compile all slides in parallel
+  const compiledSlides = await Promise.all(
+    deck.slides.map((s) => compileSlide(s, deck)),
+  )
   const allHeads = [...new Set(compiledSlides.flatMap((s) => s.head))]
 
   const html = renderShell({
@@ -59,8 +65,8 @@ const buildDeck = (options = {}) => {
     head: allHeads,
   })
 
-  fs.writeFileSync(path.join(outputDir, 'index.html'), html, 'utf8')
-  copyAssets(deck.dir, outputDir)
+  await fs.promises.writeFile(path.join(outputDir, 'index.html'), html, 'utf8')
+  await copyAssets(deck.dir, outputDir)
 
   return {
     input: deck.dir,

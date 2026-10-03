@@ -19,7 +19,7 @@ Options:
 `)
 }
 
-const main = () => {
+const main = async () => {
   const args = process.argv.slice(2)
   const options = parseArgs(args)
 
@@ -37,7 +37,7 @@ const main = () => {
   }
 
   try {
-    const res = buildDeck(options)
+    const res = await buildDeck(options)
     console.log(`Successfully generated ${res.slideCount} slides -> ${res.output}`)
   } catch (err) {
     console.error(`Error generating slides: ${err.message}`)
