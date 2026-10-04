@@ -47,18 +47,22 @@ ${slidesHtml}
       <span class="slide-counter">1 / ${total}</span>
       <button class="control-btn btn-next" aria-label="Next slide" title="Next (Right / Space / PageDown)">›</button>
       <button class="control-btn btn-notes" aria-label="Toggle speaker notes" title="Speaker Notes (S)">📝</button>
+      <button class="control-btn btn-presenter" aria-label="Open presenter window" title="Presenter Window (P)">🖥️</button>
       <button class="control-btn btn-fullscreen" aria-label="Fullscreen" title="Fullscreen (F)">⛶</button>
     </nav>
   </div>
   <div class="notes-drawer" aria-label="Speaker notes">
     <div class="notes-header">
-      <span>Speaker Notes (Press S or Esc to close)</span>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span>Speaker Notes (Press S or Esc to close)</span>
+        <button class="notes-popout-btn" style="background: #2d3139; color: #94a3b8; border: none; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.75rem; cursor: pointer;" title="Open in separate window">🖥️ Pop out</button>
+      </div>
       <button class="notes-close-btn" aria-label="Close notes">✕</button>
     </div>
     <div class="notes-content"></div>
   </div>
   <script>
-${getClientScript()}
+${getClientScript(title, THEME_CSS)}
   </script>
 </body>
 </html>`
