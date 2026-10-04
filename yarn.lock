@@ -2,3 +2,26 @@
 # yarn lockfile v1
 
 
+"@sullux/markdown-compiler@^2.0.2", "@sullux/markdown-compiler@file:/home/charles/sullux/markdown/packages/markdown-compiler":
+  version "2.0.2"
+  resolved "file:packages/markdown-compiler"
+
+"@sullux/markdown-docs@file:/home/charles/sullux/markdown/packages/markdown-docs":
+  version "2.0.5"
+  resolved "file:packages/markdown-docs"
+  dependencies:
+    "@sullux/markdown-compiler" "^2.0.2"
+    "@sullux/markdown-html" "^2.0.3"
+
+"@sullux/markdown-html@^2.0.3", "@sullux/markdown-html@file:/home/charles/sullux/markdown/packages/markdown-html":
+  version "2.0.3"
+  resolved "file:packages/markdown-html"
+  dependencies:
+    "@sullux/markdown-compiler" "^2.0.2"
+
+"@sullux/markdown-slides@file:/home/charles/sullux/markdown/packages/markdown-slides":
+  version "2.0.0"
+  resolved "file:packages/markdown-slides"
+  dependencies:
+    "@sullux/markdown-compiler" "^2.0.2"
+    "@sullux/markdown-html" "^2.0.3"

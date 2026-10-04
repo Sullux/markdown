@@ -1,50 +1,43 @@
-# Built-in Templates
+# Built-in Templates Overview
 
-`@sullux/markdown-slides` includes a suite of standard templates designed to handle common presentation patterns out of the box.
+`@sullux/markdown-slides` includes a suite of responsive slide templates designed to interpret semantic Markdown blocks into clean presentation layouts.
 
-## Standard Template Suite
+## Available Templates
 
-### 1. `Cover` (or `Title`)
-Designed for opening splash slides, speaker introductions, and section breakers.
-* **Expected Markdown**: First `#` becomes the main display title; optional `##` becomes the subtitle; trailing paragraphs become author/date lines.
-* **Layout**: Vertically and horizontally centered with enlarged typography.
+| Template | Primary Use Case | Partition Syntax |
+| :--- | :--- | :--- |
+| **[Title/Content](title-content.md)** | Standard presentation slide with top title bar and flexible body. | Single slide body |
+| **[Header/Columns/Footer](header-columns-footer.md)** | Multi-column comparison or data layout with persistent header and footer. | `---` thematic breaks |
+| **[Cover](cover.md)** | Centered presentation splash screen for titles, subtitles, and author info. | H1, H2, metadata |
+| **[Split](split.md)** | Side-by-side columns without header or footer margins. | `---` thematic breaks |
+| **[Media](media.md)** | Unpadded full-bleed slide canvas for diagrams, photos, or code demos. | Full canvas |
+| **[Quote](quote.md)** | Large typographic statement slide centering a key takeaway or quote. | Blockquote `> ` |
 
-### 2. `Title/Content` (Default)
-Standard informational slide with a top title bar and flexible content body.
-* **Expected Markdown**: First `#` becomes the title bar. All subsequent content renders in the main scroll-free viewport.
+## Setting Templates
 
-### 3. `Header/Columns/Footer`
-Partition-based layout for dashboards, multi-pillar comparisons, and summary slides.
-* **Expected Markdown**: Divided into regions using `---` thematic breaks:
-  * Partition 0: Header area
-  * Partitions 1 through $N-2$: Content columns (flexbox/grid)
-  * Partition $N-1$: Footer area
+Templates can be configured at the presentation level or on individual slides:
 
-```markdown
-# Section Title
+### Default Deck Template (`slides.yaml`)
 
----
-
-### Left Column
-* Bullet point A
-* Bullet point B
-
----
-
-### Right Column
-![Diagram](diagram.png)
-
----
-
-*Confidential - For Internal Review Only*
+```yaml
+template: Title/Content
 ```
 
-### 4. `Split`
-Side-by-side columns without header or footer partitions.
-* **Expected Markdown**: `---` divides the slide directly into side-by-side columns.
+### Per-Slide Frontmatter Override
 
-### 5. `Media` (Full-Bleed)
-Edge-to-edge canvas with minimal padding for large diagrams, architectural maps, or screenshots.
+```markdown
+---
+template: Cover
+---
+# Welcome
+```
 
-### 6. `Quote`
-Centered statement slide with large callout typography and attribution.
+### Per-Slide in `slides.yaml`
+
+```yaml
+slides:
+  - file: 01-intro.md
+    template: Cover
+  - file: 02-comparison.md
+    template: Header/Columns/Footer
+```
