@@ -5,6 +5,7 @@ const { buildDeck } = require('../lib/deck')
 const { loadDeck } = require('../lib/loader')
 const { formatTemplateList } = require('../lib/templates')
 const { addSlide } = require('../lib/add')
+const { updatePackage } = require('../lib/update')
 
 const printHelp = () => {
   console.log(`
@@ -14,6 +15,7 @@ Usage:
 
 Commands:
   add <name>             Add a new slide file with boilerplate and update slides.yaml
+  update                 Update globally-installed @sullux/markdown-slides to latest
 
 Options:
   -i, --input <dir>      Path to slides directory (default: current working directory)
@@ -44,6 +46,17 @@ const main = async () => {
       : {}
     console.log(formatTemplateList(options.input, registry))
     process.exit(0)
+  }
+
+  if (options.command === 'update') {
+    try {
+      await updatePackage()
+      console.log('Update complete!')
+      process.exit(0)
+    } catch (err) {
+      console.error(`Update failed: ${err.message}`)
+      process.exit(1)
+    }
   }
 
   if (options.command === 'add') {

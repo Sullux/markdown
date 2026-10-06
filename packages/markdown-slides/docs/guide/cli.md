@@ -17,6 +17,9 @@ ms add 04-summary
 # Add a new slide with a specific template
 ms add 05-conclusion -t Cover
 
+# Update markdown-slides globally to latest release
+ms update
+
 # List available built-in and project templates
 ms --templates
 ```
@@ -87,4 +90,14 @@ ms --templates
 
 # List built-in plus custom templates defined in ./my-deck/slides.yaml
 ms -i ./my-deck --templates
+```
+
+---
+
+### `ms update` (Self-Update)
+
+Updates globally-installed `@sullux/markdown-slides` to the latest version published to npm by automatically running `npm install -g @sullux/markdown-slides@latest`.
+
+```bash
+ms update
 ```

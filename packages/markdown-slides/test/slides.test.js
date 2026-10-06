@@ -11,6 +11,9 @@ test('markdown-slides - parseArgs correctly parses CLI options', () => {
   assert.strictEqual(options.output, './dist')
   assert.strictEqual(options.title, 'Pitch Deck')
   assert.strictEqual(options.templates, true)
+
+  const updateOpts = parseArgs(['update'])
+  assert.strictEqual(updateOpts.command, 'update')
 })
 
 test('markdown-slides - buildDeck end-to-end compiles presentation directory', async () => {

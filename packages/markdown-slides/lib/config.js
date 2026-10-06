@@ -7,6 +7,8 @@ const parseArgs = (args) => {
       if (args[i + 1] && !args[i + 1].startsWith('-')) {
         options.name = args[++i]
       }
+    } else if (arg === 'update') {
+      options.command = 'update'
     } else if (arg === '-i' || arg === '--input') {
       options.input = args[++i]
     } else if (arg === '-o' || arg === '--output') {
