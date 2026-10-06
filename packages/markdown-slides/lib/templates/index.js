@@ -5,6 +5,7 @@ const { split } = require('./split')
 const { media } = require('./media')
 const { quote } = require('./quote')
 const { Canvas } = require('./canvas')
+const { createMarkdownTemplate, renderSlotHtml } = require('./markdown')
 const { runTemplates, resolveTemplate } = require('./pipeline')
 const { listTemplates, formatTemplateList } = require('./list')
 
@@ -48,6 +49,8 @@ module.exports = {
   media,
   quote,
   Canvas,
+  createMarkdownTemplate,
+  renderSlotHtml,
   runTemplates,
   resolveTemplate,
   listTemplates,

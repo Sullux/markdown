@@ -27,12 +27,14 @@ const loadFileConfig = (dir, customFile) => {
 const normalizeConfig = (dir, opts = {}) => {
   const fileConfig = loadFileConfig(dir, opts.config)
   return {
+    ...fileConfig,
     title: opts.title || fileConfig.title || 'Presentation',
     ratio: fileConfig.ratio || opts.ratio || '16:9',
     theme: fileConfig.theme || opts.theme || 'dark',
     template: fileConfig.template || 'Title/Content',
     templates: fileConfig.templates || [],
     slides: fileConfig.slides,
+    ...(opts || {}),
   }
 }
 

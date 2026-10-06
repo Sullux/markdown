@@ -22,6 +22,7 @@
 * [Quote](templates/quote.md)
 
 ### Extensibility
+* [Main Layout & Inheritance](templates/main-template.md)
 * [Custom Templates](templates/custom-templates.md)
 
 ### Configuration

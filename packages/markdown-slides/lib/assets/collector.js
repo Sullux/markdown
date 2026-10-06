@@ -1,18 +1,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const { normalizeAssetPath, resolveAssetNames } = require('./resolver')
-
-const findImageNodes = (node, acc = []) => {
-  if (!node) return acc
-  if (node.type === 'image' && node.url) acc.push(node)
-  const list = Array.isArray(node.children)
-    ? node.children
-    : Array.isArray(node.blocks)
-      ? node.blocks
-      : []
-  for (const child of list) findImageNodes(child, acc)
-  return acc
-}
+const { findAssets, rewriteAsset } = require('./discover')
 
 const fetchRemoteAsset = async (url, destPath) => {
   try {
@@ -41,31 +30,39 @@ const copyLocalAsset = async (srcPath, destPath) => {
   }
 }
 
-const processSlideAssets = async (slides, outputDir, deckDir) => {
+const collectAstEntries = (slides = [], deckDir, registry = {}) => {
+  const entries = slides.map((slide) => ({
+    baseDir: slide.file ? path.dirname(slide.file) : deckDir,
+    ast: slide.ast,
+  }))
+  for (const t of Object.values(registry)) {
+    if (t?.ast) {
+      entries.push({ baseDir: t.dir || deckDir, ast: t.ast })
+    }
+  }
+  return entries
+}
+
+const processSlideAssets = async (slides, outputDir, deckDir, registry = {}) => {
   const imagesDir = path.join(outputDir, 'images')
   if (!fs.existsSync(imagesDir)) {
     await fs.promises.mkdir(imagesDir, { recursive: true })
   }
 
-  const slideEntries = slides.map((slide) => {
-    const baseDir = slide.file ? path.dirname(slide.file) : deckDir
-    const nodes = findImageNodes(slide.ast)
-    const items = nodes.map((node) => ({
-      node,
-      asset: normalizeAssetPath(node.url, baseDir),
-    }))
-    return { slide, items }
-  })
+  const entries = collectAstEntries(slides, deckDir, registry)
+  const entryItems = entries.map(({ baseDir, ast }) => ({
+    items: findAssets(ast).map((item) => ({
+      ...item,
+      asset: normalizeAssetPath(item.url, baseDir),
+    })),
+  }))
 
-  const allAssets = slideEntries.flatMap((se) => se.items.map((i) => i.asset))
+  const allAssets = entryItems.flatMap((e) => e.items.map((i) => i.asset))
   const mapping = resolveAssetNames(allAssets)
 
-  // Map each unique canonical asset to its download/copy action
   const uniqueAssets = new Map()
   for (const asset of allAssets) {
-    if (!uniqueAssets.has(asset.canonical)) {
-      uniqueAssets.set(asset.canonical, asset)
-    }
+    if (!uniqueAssets.has(asset.canonical)) uniqueAssets.set(asset.canonical, asset)
   }
 
   const successMap = new Map()
@@ -81,15 +78,17 @@ const processSlideAssets = async (slides, outputDir, deckDir) => {
     }),
   )
 
-  // Rewrite image node URLs in ASTs
-  for (const { items } of slideEntries) {
-    for (const { node, asset } of items) {
-      if (successMap.get(asset.canonical)) {
-        node.url = `images/${mapping.get(asset.canonical)}`
+  for (const { items } of entryItems) {
+    for (const item of items) {
+      if (successMap.get(item.asset.canonical)) {
+        rewriteAsset(item, `images/${mapping.get(item.asset.canonical)}`)
       }
     }
   }
 }
+
+const findImageNodes = (node, acc = []) =>
+  findAssets(node).filter((a) => a.type === 'image').map((a) => a.node)
 
 module.exports = {
   findImageNodes,

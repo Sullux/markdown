@@ -53,7 +53,7 @@ const buildDeck = async (options = {}) => {
   await resolveSlideTransclusions(deck.slides, deck)
 
   // Collect, disambiguate, download/copy, and rewrite image assets
-  await processSlideAssets(deck.slides, outputDir, deck.dir)
+  await processSlideAssets(deck.slides, outputDir, deck.dir, deck.registry)
 
   // Compile all slides in parallel
   const compiledSlides = await Promise.all(
