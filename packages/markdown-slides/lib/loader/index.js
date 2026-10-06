@@ -19,7 +19,10 @@ const loadDeck = (inputDir, options = {}) => {
   const customTemplates = loadCustomTemplates(dir, config.templates)
   const registry = { ...BUILT_IN_TEMPLATES, ...customTemplates }
 
-  const rawSlides = resolveSlideEntries(dir, config.slides, config)
+  const rawSlides = resolveSlideEntries(dir, config.slides, config, '', {
+    config,
+    registry,
+  })
   const totalSlides = rawSlides.length
 
   const slides = rawSlides.map((slide, i) => ({

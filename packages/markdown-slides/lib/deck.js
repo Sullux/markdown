@@ -5,6 +5,7 @@ const { loadDeck } = require('./loader')
 const { runTemplates } = require('./templates')
 const { renderShell } = require('./shell')
 const { copyAssets, processSlideAssets } = require('./assets')
+const { resolveSlideTransclusions } = require('./transclusion')
 
 const parseNotesHtml = (frontmatter = {}) => {
   const notes = frontmatter.notes || frontmatter.note || ''
@@ -26,14 +27,14 @@ const compileSlide = async (slide, deck) => {
 
   const res = runTemplates(
     slide.template,
-    { ast: slide.ast },
+    { ast: slide.ast, frontmatter: slide.frontmatter },
     context,
   )
 
   return {
     ...slide,
     html: res.html,
-    head: res.head || [],
+    head: [...(slide.extraHead || []), ...(res.head || [])],
     notesHtml: parseNotesHtml(slide.frontmatter),
   }
 }
@@ -47,6 +48,9 @@ const buildDeck = async (options = {}) => {
   if (!fs.existsSync(outputDir)) {
     await fs.promises.mkdir(outputDir, { recursive: true })
   }
+
+  // Resolve transcluded sub-documents recursively
+  await resolveSlideTransclusions(deck.slides, deck)
 
   // Collect, disambiguate, download/copy, and rewrite image assets
   await processSlideAssets(deck.slides, outputDir, deck.dir)

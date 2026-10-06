@@ -4,6 +4,7 @@ const { cover } = require('./cover')
 const { split } = require('./split')
 const { media } = require('./media')
 const { quote } = require('./quote')
+const { Canvas } = require('./canvas')
 const { runTemplates, resolveTemplate } = require('./pipeline')
 const { listTemplates, formatTemplateList } = require('./list')
 
@@ -33,6 +34,9 @@ const BUILT_IN_TEMPLATES = {
 
   Quote: quote,
   quote: quote,
+
+  Canvas: Canvas,
+  canvas: Canvas,
 }
 
 module.exports = {
@@ -43,6 +47,7 @@ module.exports = {
   split,
   media,
   quote,
+  Canvas,
   runTemplates,
   resolveTemplate,
   listTemplates,

@@ -29,7 +29,7 @@ const parseImage = (text, index, context = {}) => {
   let url = ''
   let title = undefined
   let consumedLength = 0
-  let width, height
+  let width, height, id, at
 
   const pipeIdx = rawAlt.lastIndexOf('|')
   if (pipeIdx !== -1) {
@@ -70,8 +70,13 @@ const parseImage = (text, index, context = {}) => {
     consumedLength = urlClose + 1 - index
     const braceMatch = text.slice(urlClose + 1).match(/^\{:?\s*([^}]+)\}/)
     if (braceMatch) {
-      const wMatch = braceMatch[1].match(/width\s*[:=]\s*["']?([^"'\s}]+)["']?/i)
-      const hMatch = braceMatch[1].match(/height\s*[:=]\s*["']?([^"'\s}]+)["']?/i)
+      const rawAttrs = braceMatch[1]
+      const idMatch = rawAttrs.match(/#([a-zA-Z0-9_\-]+)/)
+      if (idMatch) id = idMatch[1]
+      const atMatch = rawAttrs.match(/at\s*[:=]\s*["']?([^"'}]+)["']?/i)
+      if (atMatch) at = atMatch[1]
+      const wMatch = rawAttrs.match(/width\s*[:=]\s*["']?([^"'\s}]+)["']?/i)
+      const hMatch = rawAttrs.match(/height\s*[:=]\s*["']?([^"'\s}]+)["']?/i)
       if (wMatch) width = normalizeDimension(wMatch[1])
       if (hMatch) height = normalizeDimension(hMatch[2] || hMatch[1])
       consumedLength += braceMatch[0].length
@@ -89,6 +94,8 @@ const parseImage = (text, index, context = {}) => {
   }
 
   const token = { type: 'image', url, alt: toPlainText(rawAlt), title }
+  if (id) token.id = id
+  if (at) token.at = at
   if (width) token.width = width
   if (height) token.height = height
   return { token, consumedLength }

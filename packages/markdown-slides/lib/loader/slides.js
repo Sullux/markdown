@@ -1,6 +1,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
 const { parse } = require('@sullux/markdown-compiler')
+const { resolveContainers } = require('../subdoc/container')
 const { loadFileConfig } = require('./config')
 
 const discoverFiles = (dir) => {
@@ -10,10 +11,11 @@ const discoverFiles = (dir) => {
   return list.sort().map((f) => ({ file: f }))
 }
 
-const resolveSlideFile = (dir, entry, defaultTemplate, section) => {
+const resolveSlideFile = (dir, entry, defaultTemplate, section, deck) => {
   const filePath = path.resolve(dir, entry.file)
-  const content = fs.readFileSync(filePath, 'utf8')
-  const ast = parse(content)
+  const rawContent = fs.readFileSync(filePath, 'utf8')
+  const { text, head } = resolveContainers(rawContent, deck)
+  const ast = parse(text)
   const frontmatter = ast.frontmatter || {}
   const template = frontmatter.template || entry.template || defaultTemplate
 
@@ -24,10 +26,11 @@ const resolveSlideFile = (dir, entry, defaultTemplate, section) => {
     ast,
     frontmatter,
     template,
+    extraHead: head || [],
   }
 }
 
-const resolveSlideEntries = (dir, entries, deckConfig, section = '') => {
+const resolveSlideEntries = (dir, entries, deckConfig, section = '', deck = {}) => {
   const items = entries && entries.length > 0 ? entries : discoverFiles(dir)
   const slides = []
 
@@ -44,11 +47,12 @@ const resolveSlideEntries = (dir, entries, deckConfig, section = '') => {
         subConfig.slides,
         { ...deckConfig, template: subTemplate },
         subSection,
+        deck,
       )
       slides.push(...subSlides)
     } else if (entry.file) {
       slides.push(
-        resolveSlideFile(dir, entry, deckConfig.template, section),
+        resolveSlideFile(dir, entry, deckConfig.template, section, deck),
       )
     }
   }

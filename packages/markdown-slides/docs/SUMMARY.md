@@ -6,6 +6,7 @@
 * [Quick Start](guide/quick-start.md)
 * [CLI Reference](guide/cli.md)
 * [Deck Structure](guide/deck-structure.md)
+* [Sub-Documents & Transclusion](guide/sub-documents.md)
 * [Speaker Notes](guide/speaker-notes.md)
 * [Transitions & Stepping](guide/transitions.md)
 * [Asset Bundling](guide/assets.md)
@@ -16,6 +17,7 @@
 * [Header/Columns/Footer](templates/header-columns-footer.md)
 * [Cover](templates/cover.md)
 * [Split](templates/split.md)
+* [Canvas](templates/canvas.md)
 * [Media](templates/media.md)
 * [Quote](templates/quote.md)
 

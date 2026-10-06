@@ -10,6 +10,7 @@
 | **[Header/Columns/Footer](header-columns-footer.md)** | Multi-column comparison or data layout with persistent header and footer. | `---` thematic breaks |
 | **[Cover](cover.md)** | Centered presentation splash screen for titles, subtitles, and author info. | H1, H2, metadata |
 | **[Split](split.md)** | Side-by-side columns without header or footer margins. | `---` thematic breaks |
+| **[Canvas](canvas.md)** | 2D spatial positioning of icons, diagrams, and components. | `layout:` frontmatter coordinates |
 | **[Media](media.md)** | Unpadded full-bleed slide canvas for diagrams, photos, or code demos. | Full canvas |
 | **[Quote](quote.md)** | Large typographic statement slide centering a key takeaway or quote. | Blockquote `> ` |
 
