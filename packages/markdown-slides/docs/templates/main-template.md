@@ -127,3 +127,14 @@ base: Title/Content
 ```
 
 When the template executes, its output is passed up the chain to `base: Title/Content`, which in turn passes up to `base: Main`, forming an auditable, composable layout pipeline.
+
+---
+
+## 6. Sub-Documents & Chrome Boundary
+
+While full slides inherit `Main` by default, **sub-documents** (embedded via `:::` containers or transcluded via `![alt](./fragment.md)`) represent scoped component fragments within a slide.
+
+`@sullux/markdown-slides` automatically suppresses `Main` chrome when compiling sub-documents:
+* CSS styles and variables declared in `Main.md` naturally cascade down into the sub-document.
+* Physical DOM chrome (such as `<footer class="deck-footer">` or watermarks) is **not** duplicated inside the sub-document.
+* Custom sub-document templates can still use explicit `base:` chains to inherit from other component layouts.

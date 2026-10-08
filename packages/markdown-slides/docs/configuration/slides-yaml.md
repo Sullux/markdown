@@ -14,28 +14,21 @@ date: "2025-01-15"
 ratio: "16:9"             # "16:9" or "4:3"
 theme: "dark"             # "dark" or "light"
 
-# Custom Templates (optional)
+# Custom Templates & Overrides (optional)
+Main: ./templates/Main.md # Custom root slide layout (auto-discovered if Main.md exists)
 templates:
-  - ./templates/corporate.js
+  Hero: ./templates/Hero.md
+  Title/Content: ./templates/CustomHeader.md
 
 # Deck-wide Default Templates
-template:
-  - Corporate Header
-  - Title/Content
+template: Title/Content
 
 # Slide Sequence
 slides:
-  - file: 01-cover.md
-    template: Cover
-
-  - file: 02-overview.md
-
+  - 01-cover.md
+  - 02-overview.md
   - folder: ./deep-dive     # Nested sub-deck resolving ./deep-dive/slides.yaml
-
-  - file: 03-summary.md
-    template:
-      - Corporate Header
-      - Split
+  - 03-summary.md
 ```
 
 ## Options
@@ -45,6 +38,8 @@ slides:
 | `title` | `string` | `"Presentation"` | The document title displayed in the browser tab and presentation header. |
 | `ratio` | `string` | `"16:9"` | Aspect ratio of the presentation viewport (`"16:9"` or `"4:3"`). |
 | `theme` | `string` | `"dark"` | Active theme palette (`"dark"` or `"light"`). |
+| `Main` | `string` | `"Main.md"` | Path to custom root slide layout (auto-discovered if `Main.md` or `templates/Main.md` exists). |
+| `templates` | `object \| Array` | `{}` | Map of custom template names to `.md`/`.js` paths, or list of JS modules. |
 | `template` | `string \| Array` | `"Title/Content"` | Default template stack applied to all slides unless overridden. |
 | `slides` | `Array` | `[]` | Ordered list of slide files or sub-deck folders. |
 
@@ -69,6 +64,8 @@ steps: true
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `template` | `string \| Array` | Override the template stack for this slide (e.g. `Cover`, `Split`). |
+| `Main` | `string \| boolean` | Set `none` or `false` to opt out of the deck `Main` layout (e.g. on cover slides). |
 | `notes` | `string \| Array` | Speaker notes displayed in the presenter drawer when pressing `S`. |
 | `steps` | `boolean` | Set `true` to auto-step through list bullets or column blocks sequentially. |
 | `transitions` | `string[]` | Array of CSS selectors to reveal sequentially (e.g. `['#model', '#engine']`). |
+| `layout` | `object` | Coordinate map for `Canvas` template elements (`id: [x, y]`). |
