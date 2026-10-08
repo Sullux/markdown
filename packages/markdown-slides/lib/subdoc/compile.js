@@ -23,9 +23,13 @@ const compileSubDoc = (template, ast, frontmatter, attrs = {}, deck = {}) => {
     ...(attrs.classes || []),
   ].join(' ')
 
+  const formatDim = (val) => (typeof val === 'number' ? `${val}px` : val)
+  const heightVal = attrs.height || (frontmatter.height ? formatDim(frontmatter.height) : null)
+  const widthVal = attrs.width || (frontmatter.width ? formatDim(frontmatter.width) : null)
+
   const styleParts = []
-  if (attrs.height) styleParts.push(`height: ${attrs.height}`)
-  if (attrs.width) styleParts.push(`width: ${attrs.width}`)
+  if (heightVal) styleParts.push(`height: ${heightVal}`)
+  if (widthVal) styleParts.push(`width: ${widthVal}`)
   const styleAttr = styleParts.length ? ` style="${styleParts.join('; ')}"` : ''
 
   const wrappedHtml = `<div class="${classList}"${idAttr}${styleAttr}>

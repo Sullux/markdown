@@ -119,3 +119,56 @@ Body text.
   assert.ok(fs.existsSync(path.join(outDir, 'images', 'logo.svg')))
   assert.ok(fs.existsSync(path.join(outDir, 'images', 'bg.svg')))
 })
+
+test('main template - sub-documents do not inherit Main slide layout chrome', async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'main-subdoc-test-'))
+  const outDir = path.join(tmpDir, 'dist')
+
+  fs.writeFileSync(
+    path.join(tmpDir, 'slides.yaml'),
+    'title: Subdoc No Chrome\nslides:\n  - 01-slide.md\n',
+  )
+
+  fs.writeFileSync(
+    path.join(tmpDir, 'Main.md'),
+    `---
+name: Main
+base: none
+---
+<div class="deck-frame">
+  <slot />
+  <footer class="deck-persistent-footer">SLIDE CHROME FOOTER</footer>
+</div>
+`,
+  )
+
+  fs.writeFileSync(
+    path.join(tmpDir, '01-slide.md'),
+    `---
+template: Title/Content
+---
+# Main Slide
+
+::: Canvas {#diagram height="150px"}
+---
+layout:
+  box: [50%, 50%]
+---
+<div id="box">Inner Content</div>
+:::
+`,
+  )
+
+  const res = await buildDeck({ input: tmpDir, output: outDir })
+  assert.strictEqual(res.slideCount, 1)
+
+  const html = fs.readFileSync(path.join(outDir, 'index.html'), 'utf8')
+  // The persistent footer should appear exactly ONCE for the slide, not duplicated inside the subdoc
+  const occurrences = (html.match(/SLIDE CHROME FOOTER/g) || []).length
+  assert.strictEqual(occurrences, 1)
+
+  // Verify the subdoc container does not contain deck-persistent-footer
+  const subdocHtml = html.split('subdoc-container')[1].split('</div>')[0]
+  assert.ok(!subdocHtml.includes('SLIDE CHROME FOOTER'))
+})
+

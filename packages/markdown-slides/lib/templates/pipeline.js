@@ -14,7 +14,9 @@ const buildTemplateChain = (initial, frontmatter = {}, context = {}) => {
   const stack = Array.isArray(initial) ? [...initial] : [initial]
 
   const rootLayout = config.layout || config.base || 'Main'
+  const lowerRoot = rootLayout.toLowerCase()
   const isSuppressed =
+    Boolean(context.isSubDocument) ||
     frontmatter.Main === 'none' ||
     frontmatter.Main === false ||
     frontmatter.layout === 'none' ||
@@ -34,7 +36,7 @@ const buildTemplateChain = (initial, frontmatter = {}, context = {}) => {
     if (visited.has(lower)) break
     visited.add(lower)
 
-    if (lower === 'main' && isSuppressed) break
+    if ((lower === 'main' || lower === lowerRoot) && isSuppressed) break
 
     if (registry[nextBase] || registry[lower]) {
       stack.push(nextBase)

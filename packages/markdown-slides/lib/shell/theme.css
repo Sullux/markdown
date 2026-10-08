@@ -101,6 +101,17 @@ html, body {
   overflow: hidden;
 }
 
+.subdoc-container {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.subdoc-container .slide-layout {
+  padding: 0;
+  height: 100%;
+}
+
 .slide-header {
   flex-shrink: 0;
   margin-bottom: 1.5rem;

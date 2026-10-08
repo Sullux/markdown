@@ -1,6 +1,6 @@
 {
   "name": "@sullux/markdown-slides",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A zero-dependency, local-first presentation slide deck generator compiling Markdown into responsive, modular HTML slide presentations.",
   "main": "./index.js",
   "bin": {
