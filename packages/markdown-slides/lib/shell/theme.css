@@ -243,19 +243,31 @@ html, body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(8px);
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   color: #fff;
   font-size: 14px;
-  opacity: 0;
+  opacity: 0.75;
   transition: opacity 0.3s ease;
   z-index: 100;
   user-select: none;
 }
 
-.deck-viewport:hover .deck-controls {
+.deck-controls:hover {
+  opacity: 1;
+}
+
+:fullscreen .deck-controls,
+:-webkit-full-screen .deck-controls,
+.is-fullscreen .deck-controls {
+  opacity: 0;
+}
+
+:fullscreen .deck-controls:hover,
+:-webkit-full-screen .deck-controls:hover,
+.is-fullscreen .deck-controls:hover {
   opacity: 1;
 }
 

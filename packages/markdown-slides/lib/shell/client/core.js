@@ -46,19 +46,20 @@ const getCoreScript = () => `
   function next() {
     var s = slides[current], steps = initSteps(s);
     if (s._stepIdx < steps.length) steps[s._stepIdx++].classList.add('visible');
-    else goTo(current + 1, 'next');
+    else if (current < total - 1) goTo(current + 1, 'next');
   }
 
   function prev() {
     var s = slides[current], steps = initSteps(s);
     if (s._stepIdx > 0) steps[--s._stepIdx].classList.remove('visible');
-    else goTo(current - 1, 'prev');
+    else if (current > 0) goTo(current - 1, 'prev');
   }
 
   function toggleFullscreen() {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function () {});
     else document.exitFullscreen().catch(function () {});
   }
+  document.addEventListener('fullscreenchange', function () { document.body.classList.toggle('is-fullscreen', Boolean(document.fullscreenElement)); });
 
   function toggleNotes() { document.body.classList.toggle('show-notes'); }
 
