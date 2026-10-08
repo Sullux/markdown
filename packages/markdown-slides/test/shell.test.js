@@ -42,5 +42,7 @@ test('shell - renders HTML document with slides, theme, controls, and assets', (
   assert.ok(html.includes('slides-presenter'))
   assert.ok(html.includes('1 / 2'))
   assert.ok(html.includes('class="deck-progress"'))
+  assert.ok(html.includes('--deck-scale'))
+  assert.ok(html.includes('fitCanvas'))
   assert.ok(html.includes('addEventListener(\'keydown\''))
 })

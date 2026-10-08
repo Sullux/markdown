@@ -1,5 +1,6 @@
 const PRESENTER_CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
   body { background: #121316; color: #f0f4f8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
   .p-shell { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; gap: 1rem; padding: 1rem; }
   .p-col { display: flex; flex-direction: column; gap: 1rem; height: 100%; min-height: 0; }
