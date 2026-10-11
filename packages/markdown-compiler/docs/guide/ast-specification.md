@@ -147,7 +147,7 @@ Inline nodes represent formatting, text, and media inside block elements:
 * **`code`**: `{ type: 'code', value: string }`
 * **`link`**: `{ type: 'link', url: string, title?: string, children: InlineNode[] }`
 * **`wikilink`**: `{ type: 'wikilink', target: string, display: string }`
-* **`image`**: `{ type: 'image', url: string, alt: string, title?: string, width?: string, height?: string }`
+* **`image`**: `{ type: 'image', url: string, alt: string, title?: string, width?: string, height?: string, id?: string, classes?: string[], attributes?: Record<string, any> }`
 * **`checkbox`**: `{ type: 'checkbox', checked: boolean }`
 * **`html`**: `{ type: 'html', value: string }`
 * **`inlineMath`**: `{ type: 'inlineMath', value: string }`

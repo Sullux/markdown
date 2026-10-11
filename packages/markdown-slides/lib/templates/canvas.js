@@ -45,12 +45,12 @@ const Canvas = (state = {}, context = {}) => {
   // Apply layout coordinates to elements by id
   for (const [id, spec] of Object.entries(layout)) {
     const posStyle = buildPositionStyle(spec)
-    const regex = new RegExp(`(<(?:img|div|p|span)[^>]*\\bid=["']${id}["'][^>]*)style=["']([^"']*)["']`, 'gi')
+    const regex = new RegExp(`(<(?:img|div|p|span)[^>]*?\\bid=["']${id}["'][^>]*?\\bstyle=["'])([^"']*)["']`, 'gi')
     if (regex.test(html)) {
-      html = html.replace(regex, `$1style="${posStyle} $2"`)
+      html = html.replace(regex, `$1${posStyle} $2"`)
     } else {
-      const tagRegex = new RegExp(`(<(?:img|div|p|span)[^>]*\\bid=["']${id}["'][^>]*)>`, 'gi')
-      html = html.replace(tagRegex, `$1 style="${posStyle}">`)
+      const tagRegex = new RegExp(`(<(?:img|div|p|span)[^>]*?\\bid=["']${id}["'][^>]*?)\\s*(\\/?)>`, 'gi')
+      html = html.replace(tagRegex, (match, prefix, slash) => `${prefix} style="${posStyle}"${slash ? ' /' : ''}>`)
     }
   }
 

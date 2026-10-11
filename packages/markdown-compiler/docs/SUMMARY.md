@@ -6,6 +6,7 @@
 
 * [Quick Start](guide/quick-start.md)
 * [AST Specification](guide/ast-specification.md)
+* [Attribute Lists ({...})](guide/attribute-lists.md)
 
 ## API Reference
 

@@ -1,5 +1,6 @@
 const { normalizeLabel } = require('./link-def')
 const { parseDestAndTitle, toPlainText } = require('./link-utils')
+const { parseAttributeList } = require('./attributes')
 
 const normalizeDimension = (val) => {
   if (!val) return undefined
@@ -7,54 +8,43 @@ const normalizeDimension = (val) => {
   return /^\d+$/.test(val) ? `${val}px` : val
 }
 
+const findClosing = (text, start, open, close) => {
+  let depth = 0
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === open) depth++
+    else if (text[i] === close && --depth === 0) return i
+  }
+  return -1
+}
+
+const parseDimensionsFromAlt = (rawAlt) => {
+  const pipeIdx = rawAlt.lastIndexOf('|')
+  if (pipeIdx === -1) return { alt: rawAlt }
+  const match = rawAlt.slice(pipeIdx + 1).trim().match(/^(\d+(?:px|%)?)(?:x(\d+(?:px|%)?))?$/i)
+  if (!match) return { alt: rawAlt }
+  return {
+    alt: rawAlt.slice(0, pipeIdx).trim(),
+    width: normalizeDimension(match[1]),
+    height: match[2] ? normalizeDimension(match[2]) : undefined,
+  }
+}
+
 const parseImage = (text, index, context = {}) => {
   if (!text.startsWith('![', index)) return null
-
-  let bracketDepth = 0
-  let altClose = -1
-  for (let i = index + 1; i < text.length; i++) {
-    const char = text.charAt(i)
-    if (char === '[') bracketDepth++
-    else if (char === ']') {
-      bracketDepth--
-      if (bracketDepth === 0) {
-        altClose = i
-        break
-      }
-    }
-  }
+  const altClose = findClosing(text, index + 1, '[', ']')
   if (altClose === -1) return null
 
-  let rawAlt = text.slice(index + 2, altClose)
+  const dimInfo = parseDimensionsFromAlt(text.slice(index + 2, altClose))
+  let rawAlt = dimInfo.alt
+  let width = dimInfo.width
+  let height = dimInfo.height
   let url = ''
   let title = undefined
   let consumedLength = 0
-  let width, height, id, at
-
-  const pipeIdx = rawAlt.lastIndexOf('|')
-  if (pipeIdx !== -1) {
-    const dimSpec = rawAlt.slice(pipeIdx + 1).trim()
-    const sizeMatch = dimSpec.match(/^(\d+(?:px|%)?)(?:x(\d+(?:px|%)?))?$/i)
-    if (sizeMatch) {
-      rawAlt = rawAlt.slice(0, pipeIdx).trim()
-      width = normalizeDimension(sizeMatch[1])
-      if (sizeMatch[2]) height = normalizeDimension(sizeMatch[2])
-    }
-  }
+  let attrList = undefined
 
   if (text.charAt(altClose + 1) === '(') {
-    let parenDepth = 0
-    let urlClose = -1
-    for (let i = altClose + 1; i < text.length; i++) {
-      if (text.charAt(i) === '(') parenDepth++
-      else if (text.charAt(i) === ')') {
-        parenDepth--
-        if (parenDepth === 0) {
-          urlClose = i
-          break
-        }
-      }
-    }
+    const urlClose = findClosing(text, altClose + 1, '(', ')')
     if (urlClose === -1) return null
     let rawUrl = text.slice(altClose + 2, urlClose).trim()
     const eqMatch = rawUrl.match(/^(\S+)\s+=(\d+(?:px|%)?)(?:x(\d+(?:px|%)?))?$/i)
@@ -68,17 +58,10 @@ const parseImage = (text, index, context = {}) => {
     url = parsed.url
     title = parsed.title
     consumedLength = urlClose + 1 - index
+
     const braceMatch = text.slice(urlClose + 1).match(/^\{:?\s*([^}]+)\}/)
     if (braceMatch) {
-      const rawAttrs = braceMatch[1]
-      const idMatch = rawAttrs.match(/#([a-zA-Z0-9_\-]+)/)
-      if (idMatch) id = idMatch[1]
-      const atMatch = rawAttrs.match(/at\s*[:=]\s*["']?([^"'}]+)["']?/i)
-      if (atMatch) at = atMatch[1]
-      const wMatch = rawAttrs.match(/width\s*[:=]\s*["']?([^"'\s}]+)["']?/i)
-      const hMatch = rawAttrs.match(/height\s*[:=]\s*["']?([^"'\s}]+)["']?/i)
-      if (wMatch) width = normalizeDimension(wMatch[1])
-      if (hMatch) height = normalizeDimension(hMatch[2] || hMatch[1])
+      attrList = parseAttributeList(braceMatch[0])
       consumedLength += braceMatch[0].length
     }
   } else {
@@ -94,10 +77,18 @@ const parseImage = (text, index, context = {}) => {
   }
 
   const token = { type: 'image', url, alt: toPlainText(rawAlt), title }
-  if (id) token.id = id
-  if (at) token.at = at
   if (width) token.width = width
   if (height) token.height = height
+
+  if (attrList) {
+    if (attrList.id) token.id = attrList.id
+    if (attrList.classes?.length) token.classes = attrList.classes
+    if (attrList.attributes && Object.keys(attrList.attributes).length) {
+      token.attributes = attrList.attributes
+      if (attrList.attributes.width) token.width = normalizeDimension(attrList.attributes.width)
+      if (attrList.attributes.height) token.height = normalizeDimension(attrList.attributes.height)
+    }
+  }
   return { token, consumedLength }
 }
 

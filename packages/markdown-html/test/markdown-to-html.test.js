@@ -80,6 +80,15 @@ test('markdownToHtml - Images with dimensions render inline CSS styles', () => {
   assert.strictEqual(html, '<p><img src="architecture.png" alt="Diagram" style="width: 400px; height: 200px;" /></p>\n')
 })
 
+test('markdownToHtml - Images with id and classes render standard HTML attributes', () => {
+  const md = '![Audience](audience.jpg){#general-audience .fade-edges .glow width=300px}'
+  const { html } = markdownToHtml(md)
+  assert.strictEqual(
+    html,
+    '<p><img src="audience.jpg" alt="Audience" id="general-audience" class="fade-edges glow" style="width: 300px;" /></p>\n',
+  )
+})
+
 test('markdownToHtml - Strips YAML frontmatter', () => {
   const md = '---\ntitle: Doc Title\nauthor: Charles\n---\n\n# Real Content'
   const { html } = markdownToHtml(md)

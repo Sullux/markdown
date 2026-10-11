@@ -265,6 +265,20 @@ test('image dimension parsing supports Obsidian, Pandoc/Gitlab, GitHub, and VS C
   assert.strictEqual(vscode.blocks[0].children[0].height, '150px')
 })
 
+test('generic attribute list parsing on images supports ids, multiple classes, and arbitrary attributes', () => {
+  const md = '![Audience](audience.jpg){#general-audience .fade-edges .glow at="65%, 15%" width="400px" clip=false autoplay}'
+  const ast = parse(md)
+  const img = ast.blocks[0].children[0]
+
+  assert.strictEqual(img.type, 'image')
+  assert.strictEqual(img.id, 'general-audience')
+  assert.deepStrictEqual(img.classes, ['fade-edges', 'glow'])
+  assert.strictEqual(img.width, '400px')
+  assert.strictEqual(img.attributes.at, '65%, 15%')
+  assert.strictEqual(img.attributes.clip, false)
+  assert.strictEqual(img.attributes.autoplay, true)
+})
+
 test('HTML block parsing preserves raw block HTML elements', () => {
   const md = '<p align="center">\n  <img src="logo.svg" alt="Logo" width="160" height="160" />\n</p>\n\n# Heading'
   const ast = parse(md)

@@ -37,8 +37,13 @@ const renderInline = (tokens, options = {}) => {
             styleAttr = ` style="${styles.join('; ')};"`
           }
           const idAttr = token.id ? ` id="${escapeHtml(token.id)}"` : ''
+          const classList = [
+            ...(token.classes || []),
+            ...(token.className ? [token.className] : []),
+          ].filter(Boolean)
+          const classAttr = classList.length ? ` class="${escapeHtml(classList.join(' '))}"` : ''
           const titleAttr = token.title ? ` title="${escapeHtml(token.title)}"` : ''
-          return `<img src="${escapeHtml(token.url)}" alt="${escapeHtml(token.alt)}"${idAttr}${titleAttr}${styleAttr} />`
+          return `<img src="${escapeHtml(token.url)}" alt="${escapeHtml(token.alt)}"${idAttr}${classAttr}${titleAttr}${styleAttr} />`
         }
         case 'checkbox':
           return `<input type="checkbox"${token.checked ? ' checked' : ''} disabled /> `
