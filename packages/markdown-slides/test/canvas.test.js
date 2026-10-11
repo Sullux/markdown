@@ -135,3 +135,38 @@ Concluding text.
   assert.ok(html.includes('left: 25%; top: 50%'))
   assert.ok(html.includes('left: 75%; top: 50%'))
 })
+
+test('canvas - supports unclipped overflow via frontmatter or container attribute', async () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'canvas-overflow-test-'))
+  const outDir = path.join(tmpDir, 'dist')
+
+  fs.writeFileSync(
+    path.join(tmpDir, 'slides.yaml'),
+    'title: Overflow Test\nslides:\n  - 01-slide.md\n',
+  )
+
+  fs.writeFileSync(
+    path.join(tmpDir, '01-slide.md'),
+    `---
+template: Title/Content
+---
+# Unclipped Canvas
+
+::: Canvas {#overflow-canvas height="150px" overflow="visible"}
+---
+layout:
+  badge: [50%, 0%]
+---
+<div id="badge">Overhanging Badge</div>
+:::
+`,
+  )
+
+  const res = await buildDeck({ input: tmpDir, output: outDir })
+  assert.strictEqual(res.slideCount, 1)
+
+  const html = fs.readFileSync(path.join(outDir, 'index.html'), 'utf8')
+  assert.ok(html.includes('overflow: visible'))
+  assert.ok(html.includes('id="overflow-canvas"'))
+})
+

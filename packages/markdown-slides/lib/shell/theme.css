@@ -111,6 +111,7 @@ html, body {
 .subdoc-container .slide-layout {
   padding: 0;
   height: 100%;
+  overflow: inherit;
 }
 
 .slide-header {

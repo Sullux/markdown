@@ -85,3 +85,30 @@ layout:
 ![Sink](images/sink.svg){#sink}
 :::
 ```
+
+## Intentional Overflow & Unclipped Badges
+
+By default, canvas boundaries clip overflowing content (`overflow: hidden`). When you want elements to bleed or float beyond the canvas boundary (for example, badges overhanging a card, or floating illustrations), enable unclipped overflow:
+
+### Via Fenced Container Directive
+```markdown
+::: Canvas {#badge-row height="150px" overflow="visible"}
+---
+layout:
+  badge: [50%, 0%]
+---
+<div id="badge">Overhanging Badge</div>
+:::
+```
+Alternatively, use `clip="false"`.
+
+### Via Frontmatter
+```yaml
+---
+template: Canvas
+height: 200
+overflow: visible
+layout:
+  popout: [80%, 10%]
+---
+```

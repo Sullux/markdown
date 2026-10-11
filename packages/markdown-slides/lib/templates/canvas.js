@@ -56,8 +56,9 @@ const Canvas = (state = {}, context = {}) => {
 
   const height = fm.height ? (typeof fm.height === 'number' ? `${fm.height}px` : fm.height) : '100%'
   const width = fm.width ? (typeof fm.width === 'number' ? `${fm.width}px` : fm.width) : '100%'
+  const overflow = fm.overflow || (fm.clip === false || fm.clip === 'false' ? 'visible' : 'hidden')
 
-  const wrapped = `<div class="slide-layout slide-canvas" style="position: relative; width: ${width}; height: ${height}; overflow: hidden;">
+  const wrapped = `<div class="slide-layout slide-canvas" style="position: relative; width: ${width}; height: ${height}; overflow: ${overflow};">
 ${html}
 </div>`
 

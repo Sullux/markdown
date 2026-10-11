@@ -10,9 +10,15 @@ const compileSubDoc = (template, ast, frontmatter, attrs = {}, deck = {}) => {
     isSubDocument: true,
   }
 
+  const mergedFm = {
+    ...frontmatter,
+    ...(attrs.overflow ? { overflow: attrs.overflow } : {}),
+    ...(attrs.clip === 'false' || attrs.clip === false ? { overflow: 'visible' } : {}),
+  }
+
   const rendered = runTemplates(
     templateName,
-    { ast, frontmatter },
+    { ast, frontmatter: mergedFm },
     context,
   )
 
@@ -26,10 +32,12 @@ const compileSubDoc = (template, ast, frontmatter, attrs = {}, deck = {}) => {
   const formatDim = (val) => (typeof val === 'number' ? `${val}px` : val)
   const heightVal = attrs.height || (frontmatter.height ? formatDim(frontmatter.height) : null)
   const widthVal = attrs.width || (frontmatter.width ? formatDim(frontmatter.width) : null)
+  const overflowVal = mergedFm.overflow
 
   const styleParts = []
   if (heightVal) styleParts.push(`height: ${heightVal}`)
   if (widthVal) styleParts.push(`width: ${widthVal}`)
+  if (overflowVal) styleParts.push(`overflow: ${overflowVal}`)
   const styleAttr = styleParts.length ? ` style="${styleParts.join('; ')}"` : ''
 
   const wrappedHtml = `<div class="${classList}"${idAttr}${styleAttr}>
