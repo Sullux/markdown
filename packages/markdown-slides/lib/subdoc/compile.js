@@ -32,7 +32,7 @@ const compileSubDoc = (template, ast, frontmatter, attrs = {}, deck = {}) => {
   const formatDim = (val) => (typeof val === 'number' ? `${val}px` : val)
   const heightVal = attrs.height || (frontmatter.height ? formatDim(frontmatter.height) : null)
   const widthVal = attrs.width || (frontmatter.width ? formatDim(frontmatter.width) : null)
-  const overflowVal = mergedFm.overflow
+  const overflowVal = mergedFm.overflow || (mergedFm.clip === false || mergedFm.clip === 'false' ? 'visible' : null)
 
   const styleParts = []
   if (heightVal) styleParts.push(`height: ${heightVal}`)

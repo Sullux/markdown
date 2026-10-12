@@ -99,7 +99,7 @@ html, body {
   padding: 2.5rem 3rem;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .subdoc-container {
@@ -130,7 +130,7 @@ html, body {
 .slide-body {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: visible;
   font-size: 1.25rem;
   line-height: 1.6;
 }
@@ -141,13 +141,14 @@ html, body {
   gap: 2.5rem;
   min-height: 0;
   align-items: stretch;
+  overflow: visible;
 }
 
 .slide-col {
   flex: 1;
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow: visible;
   font-size: 1.25rem;
   line-height: 1.6;
 }
@@ -220,7 +221,9 @@ html, body {
   background: var(--code-bg);
   padding: 1rem;
   border-radius: 6px;
-  overflow: auto;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
   font-family: var(--font-mono);
   font-size: 0.95rem;
   border: 1px solid var(--border-color);
