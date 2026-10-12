@@ -14,12 +14,16 @@ const renderBlock = (node, options = {}) => {
     case 'header': {
       const text = renderInline(node.children, options)
       const rawText = node.children ? node.children.map((c) => (c.type === 'text' ? c.value : '')).join('') : ''
-      const idAttr = options.headingIds !== false ? ` id="${(options.slugify || slugify)(rawText, options.usedSlugs)}"` : ''
-      const html = `<h${node.level}${idAttr}>${text}</h${node.level}>\n`
+      const explicitId = node.id
+      const idAttr = explicitId ? ` id="${escapeHtml(explicitId)}"` : (options.headingIds !== false ? ` id="${(options.slugify || slugify)(rawText, options.usedSlugs)}"` : '')
+      const classAttr = node.classes?.length ? ` class="${escapeHtml(node.classes.join(' '))}"` : ''
+      const html = `<h${node.level}${idAttr}${classAttr}>${text}</h${node.level}>\n`
       return hasInlineMath(node.children) ? { html, head: KATEX_HEAD } : html
     }
     case 'paragraph': {
-      const html = `<p>${renderInline(node.children, options)}</p>\n`
+      const idAttr = node.id ? ` id="${escapeHtml(node.id)}"` : ''
+      const classAttr = node.classes?.length ? ` class="${escapeHtml(node.classes.join(' '))}"` : ''
+      const html = `<p${idAttr}${classAttr}>${renderInline(node.children, options)}</p>\n`
       return hasInlineMath(node.children) ? { html, head: KATEX_HEAD } : html
     }
     case 'codeBlock': {

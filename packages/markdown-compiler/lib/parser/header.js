@@ -1,4 +1,5 @@
 const { parseInline } = require('./inline')
+const { extractTrailingAttributes } = require('./attributes')
 
 const parseHeader = (line, context) => {
   const match = line.match(/^ {0,3}(#{1,6})(?:[ \t]+(.*?))?[ \t]*$/)
@@ -6,10 +7,15 @@ const parseHeader = (line, context) => {
   const level = match[1].length
   let content = match[2] || ''
   content = content.replace(/(^|[ \t]+)(?<!\\)#+[ \t]*$/, '$1').trim()
+  const trailing = extractTrailingAttributes(content)
+  const headerText = trailing ? trailing.cleanText : content
   return {
     type: 'header',
     level,
-    children: content ? parseInline(content, context) : [],
+    children: headerText ? parseInline(headerText, context) : [],
+    ...(trailing?.id ? { id: trailing.id } : {}),
+    ...(trailing?.classes?.length ? { classes: trailing.classes } : {}),
+    ...(trailing?.attributes && Object.keys(trailing.attributes).length ? { attributes: trailing.attributes } : {}),
   }
 }
 

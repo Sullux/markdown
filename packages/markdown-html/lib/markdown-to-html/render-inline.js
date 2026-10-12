@@ -23,8 +23,15 @@ const renderInline = (tokens, options = {}) => {
         case 'html':
           return token.value
         case 'link': {
+          const idAttr = token.id ? ` id="${escapeHtml(token.id)}"` : ''
+          const classAttr = token.classes?.length ? ` class="${escapeHtml(token.classes.join(' '))}"` : ''
           const titleAttr = token.title ? ` title="${escapeHtml(token.title)}"` : ''
-          return `<a href="${escapeHtml(token.url)}"${titleAttr}>${renderInline(token.children, options)}</a>`
+          return `<a href="${escapeHtml(token.url)}"${idAttr}${classAttr}${titleAttr}>${renderInline(token.children, options)}</a>`
+        }
+        case 'span': {
+          const idAttr = token.id ? ` id="${escapeHtml(token.id)}"` : ''
+          const classAttr = token.classes?.length ? ` class="${escapeHtml(token.classes.join(' '))}"` : ''
+          return `<span${idAttr}${classAttr}>${renderInline(token.children, options)}</span>`
         }
         case 'wikilink':
           return `<a href="${escapeHtml(token.target)}">${escapeHtml(token.display)}</a>`

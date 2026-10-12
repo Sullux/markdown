@@ -3,6 +3,7 @@ const { parseDestAndTitle } = require('./link-utils')
 const { parseCodeSpan } = require('./code-span')
 const { parseInlineHtml } = require('./inline-html')
 const { parseAutolink } = require('./autolink')
+const { parseAttributeList } = require('./attributes')
 
 const findParenClose = (text, startIdx) => {
   let inPointy = false, inQuote = null, depth = 0
@@ -11,8 +12,8 @@ const findParenClose = (text, startIdx) => {
     let slashes = 0, p = i - 1
     while (p >= startIdx && text[p] === '\\') { slashes++; p-- }
     if (slashes % 2 === 1) continue
-    if (inPointy) { if (char === '>') inPointy = false; continue }
-    if (inQuote) { if (char === inQuote) inQuote = null; continue }
+    if (inPointy) { inPointy = char !== '>'; continue }
+    if (inQuote) { inQuote = char === inQuote ? null : inQuote; continue }
     if (char === '<' && i === startIdx + 1) { inPointy = true; continue }
     if ((char === '"' || char === "'") && i > startIdx + 1 && /[ \t\n\v\f\r]/.test(text[i - 1])) { inQuote = char; continue }
     if (char === '(') depth++
@@ -27,8 +28,7 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
   let bracketDepth = 0, textClose = -1
   for (let i = index; i < text.length; i++) {
     if (text[i] === '`') {
-      const cs = parseCodeSpan(text, i)
-      if (cs) { i += cs.consumedLength - 1; continue }
+      const cs = parseCodeSpan(text, i); if (cs) { i += cs.consumedLength - 1; continue }
     }
     if (text[i] === '<') {
       const skip = parseInlineHtml(text, i) || parseAutolink(text, i)
@@ -46,44 +46,51 @@ const parseInlineLinks = (text, index, parseInline, context = {}) => {
 
   const linkText = text.slice(index + 1, textClose)
   if (/(?:^|[^!\\])\[[^\]]+\](?:\([^)]+\)|\[[^\]]*\])/.test(linkText)) return null
-  const innerCtx = { ...context, inLink: true }
+  const innerCtx = { ...context, inLink: true }, nextChar = text.charAt(textClose + 1)
 
-  if (text.charAt(textClose + 1) === '(') {
+  if (nextChar === '(') {
     const urlClose = findParenClose(text, textClose + 1)
     if (urlClose !== -1) {
       const parsed = parseDestAndTitle(text.slice(textClose + 2, urlClose))
       if (parsed) {
+        let consumed = urlClose + 1 - index
+        const bMatch = text.slice(urlClose + 1).match(/^\{(:?[^}\n]+)\}/)
+        const at = bMatch && /^[ \t]*:|[#.]|[a-zA-Z0-9_\-]+[=:]/.test(bMatch[1]) ? parseAttributeList(bMatch[0]) : null
+        if (at) consumed += bMatch[0].length
         return {
-          token: { type: 'link', url: parsed.url, title: parsed.title, children: parseInline(linkText, innerCtx) },
-          consumedLength: urlClose + 1 - index,
+          token: {
+            type: 'link', url: parsed.url, title: parsed.title, children: parseInline(linkText, innerCtx),
+            ...(at?.id ? { id: at.id } : {}), ...(at?.classes?.length ? { classes: at.classes } : {}), ...(at?.attributes ? { attributes: at.attributes } : {}),
+          },
+          consumedLength: consumed,
         }
       }
     }
   }
 
-  if (text.charAt(textClose + 1) === '[') {
+  if (nextChar === '{') {
+    const bm = text.slice(textClose + 1).match(/^\{(:?[^}\n]+)\}/)
+    if (bm && /^[ \t]*:|[#.]|[a-zA-Z0-9_\-]+[=:]/.test(bm[1])) {
+      const at = parseAttributeList(bm[0])
+      return {
+        token: {
+          type: 'span', children: parseInline(linkText, context),
+          ...(at.id ? { id: at.id } : {}), ...(at.classes?.length ? { classes: at.classes } : {}), ...(at.attributes ? { attributes: at.attributes } : {}),
+        },
+        consumedLength: textClose + 1 + bm[0].length - index,
+      }
+    }
+  }
+
+  if (nextChar === '[') {
     const labelClose = text.indexOf(']', textClose + 2)
     if (labelClose !== -1) {
-      const rawLabel = text.slice(textClose + 2, labelClose)
-      const targetLabel = rawLabel.trim() || linkText
-      const def = context.definitions?.get(normalizeLabel(targetLabel))
-      if (def) {
-        return {
-          token: { type: 'link', url: def.url, title: def.title, children: parseInline(linkText, innerCtx) },
-          consumedLength: labelClose + 1 - index,
-        }
-      }
+      const def = context.definitions?.get(normalizeLabel(text.slice(textClose + 2, labelClose).trim() || linkText))
+      if (def) return { token: { type: 'link', url: def.url, title: def.title, children: parseInline(linkText, innerCtx) }, consumedLength: labelClose + 1 - index }
     }
-  }
-
-  if (text.charAt(textClose + 1) !== '[') {
+  } else {
     const def = context.definitions?.get(normalizeLabel(linkText))
-    if (def) {
-      return {
-        token: { type: 'link', url: def.url, title: def.title, children: parseInline(linkText, innerCtx) },
-        consumedLength: textClose + 1 - index,
-      }
-    }
+    if (def) return { token: { type: 'link', url: def.url, title: def.title, children: parseInline(linkText, innerCtx) }, consumedLength: textClose + 1 - index }
   }
   return null
 }

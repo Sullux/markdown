@@ -1,5 +1,5 @@
 const { parse } = require('./lib/parser')
-const { parseAttributeList } = require('./lib/parser/attributes')
+const { parseAttributeList, extractTrailingAttributes } = require('./lib/parser/attributes')
 const { stringify } = require('./lib/stringify')
 const { parseYaml } = require('./lib/yaml')
 const Node = require('./lib/nodes')
@@ -12,6 +12,7 @@ const toMarkdown = (html) => {
 module.exports = {
   parse,
   parseAttributeList,
+  extractTrailingAttributes,
   stringify,
   toMarkdown,
   parseYaml,

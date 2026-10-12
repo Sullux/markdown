@@ -89,6 +89,36 @@ test('markdownToHtml - Images with id and classes render standard HTML attribute
   )
 })
 
+test('markdownToHtml - Paragraphs, headings, spans, and lists render id and class attributes', () => {
+  const pMd = 'Photo by Mike Scheid on Unsplash {.caption #caption}'
+  assert.strictEqual(
+    markdownToHtml(pMd).html,
+    '<p id="caption" class="caption">Photo by Mike Scheid on Unsplash</p>\n',
+  )
+
+  const hMd = '# Title {#my-title .hero}'
+  assert.strictEqual(
+    markdownToHtml(hMd).html,
+    '<h1 id="my-title" class="hero">Title</h1>\n',
+  )
+
+  const spanMd = 'Hello [world]{.badge #badge-1}!'
+  assert.strictEqual(
+    markdownToHtml(spanMd).html,
+    '<p>Hello <span id="badge-1" class="badge">world</span>!</p>\n',
+  )
+
+  const listMd = [
+    '{: #my-list .feature-list}',
+    '- Item 1',
+    '- Item 2 {.active #active-2}',
+  ].join('\n')
+  assert.strictEqual(
+    markdownToHtml(listMd).html,
+    '<ul id="my-list" class="feature-list">\n<li>Item 1</li>\n<li id="active-2" class="active">Item 2</li>\n</ul>\n',
+  )
+})
+
 test('markdownToHtml - Strips YAML frontmatter', () => {
   const md = '---\ntitle: Doc Title\nauthor: Charles\n---\n\n# Real Content'
   const { html } = markdownToHtml(md)

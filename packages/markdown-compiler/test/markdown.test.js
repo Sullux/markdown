@@ -279,6 +279,53 @@ test('generic attribute list parsing on images supports ids, multiple classes, a
   assert.strictEqual(img.attributes.autoplay, true)
 })
 
+test('generic attribute list parsing on headings, paragraphs, and bracketed spans', () => {
+  const hMd = '# Overview {#intro-heading .hero-title}'
+  const hAst = parse(hMd)
+  assert.strictEqual(hAst.blocks[0].type, 'header')
+  assert.strictEqual(hAst.blocks[0].id, 'intro-heading')
+  assert.deepStrictEqual(hAst.blocks[0].classes, ['hero-title'])
+  assert.strictEqual(hAst.blocks[0].children[0].value, 'Overview')
+
+  const pMd = 'Photo by Mike Scheid on Unsplash {.caption #caption}'
+  const pAst = parse(pMd)
+  assert.strictEqual(pAst.blocks[0].type, 'paragraph')
+  assert.strictEqual(pAst.blocks[0].id, 'caption')
+  assert.deepStrictEqual(pAst.blocks[0].classes, ['caption'])
+  assert.strictEqual(pAst.blocks[0].children[0].value, 'Photo by Mike Scheid on Unsplash')
+
+  const spanMd = 'Here is [highlighted text]{#badge .badge-success} inside sentence.'
+  const spanAst = parse(spanMd)
+  const span = spanAst.blocks[0].children[1]
+  assert.strictEqual(span.type, 'span')
+  assert.strictEqual(span.id, 'badge')
+  assert.deepStrictEqual(span.classes, ['badge-success'])
+  assert.strictEqual(span.children[0].value, 'highlighted text')
+})
+
+test('generic attribute list parsing on list items and list containers', () => {
+  const itemMd = [
+    '- Item 1',
+    '- Item 2 {.active #active-item}',
+    '- Item 3',
+  ].join('\n')
+  const itemAst = parse(itemMd)
+  const list = itemAst.blocks[0]
+  assert.strictEqual(list.type, 'bulletList')
+  assert.strictEqual(list.children[1].id, 'active-item')
+  assert.deepStrictEqual(list.children[1].classes, ['active'])
+
+  const containerMd = [
+    '{: #custom-list .grid-layout}',
+    '- Alpha',
+    '- Beta',
+  ].join('\n')
+  const contAst = parse(containerMd)
+  assert.strictEqual(contAst.blocks[0].type, 'bulletList')
+  assert.strictEqual(contAst.blocks[0].id, 'custom-list')
+  assert.deepStrictEqual(contAst.blocks[0].classes, ['grid-layout'])
+})
+
 test('HTML block parsing preserves raw block HTML elements', () => {
   const md = '<p align="center">\n  <img src="logo.svg" alt="Logo" width="160" height="160" />\n</p>\n\n# Heading'
   const ast = parse(md)

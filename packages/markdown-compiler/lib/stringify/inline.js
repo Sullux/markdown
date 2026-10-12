@@ -27,6 +27,13 @@ const stringifyInline = (node, stringifyNode) => {
     }
     case 'wikilink':
       return node.display === node.target ? `[[${node.target}]]` : `[[${node.target}|${node.display}]]`
+    case 'span': {
+      const parts = [
+        ...(node.id ? [`#${node.id}`] : []),
+        ...(node.classes?.length ? node.classes.map((c) => `.${c}`) : []),
+      ]
+      return `[${stringifyNode(node.children)}]${parts.length ? `{${parts.join(' ')}}` : ''}`
+    }
     case 'image': {
       const titleStr = node.title ? ` "${node.title.replace(/"/g, '\\"')}"` : ''
       const sizeStr = node.width || node.height ? `|${node.height ? `${node.width}x${node.height}` : `${node.width}`}` : ''
